@@ -6,6 +6,9 @@ import lombok.*;
 
 @Entity(name="users")
 @Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
     @NotBlank(message = "이름을 입력해주세요.")
