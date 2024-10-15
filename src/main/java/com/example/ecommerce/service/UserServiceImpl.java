@@ -25,9 +25,9 @@ public class UserServiceImpl implements UserService {
             throw new UserEmailDuplicateException(UserException.DUPLICATE.getStatus(), UserException.DUPLICATE.getMessage());
         }
 
-        User insertUser = UserDto.toEntity(dto);
+        User user = UserDto.toEntity(dto);
 
-        return userRepository.save(insertUser).getId();
+        return userRepository.save(user).getId();
     }
 
 
