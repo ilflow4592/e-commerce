@@ -1,7 +1,7 @@
 package com.example.ecommerce.service;
 
 import com.example.ecommerce.common.exception.user.UserEmailDuplicateException;
-import com.example.ecommerce.dto.UserDto;
+import com.example.ecommerce.dto.SignUpDto;
 import com.example.ecommerce.entity.User;
 import com.example.ecommerce.repository.UserRepository;
 import org.assertj.core.api.Assertions;
@@ -36,11 +36,11 @@ public class UserServiceTest {
     @DisplayName("유저는 회원가입을 할 수 있다.")
     void signUp(){
         //given
-        UserDto userDto = UserDto.builder().email("test123@gmail.com").password("1234").name("ILYA").phoneNumber("01012341234").build();
+        SignUpDto signUpDto = SignUpDto.builder().email("test123@gmail.com").password("1234").name("ILYA").phoneNumber("01012341234").build();
         given(userRepository.save(any(User.class))).willReturn(user);
 
         //when
-        Long id = userService.signUp(userDto);
+        Long id = userService.signUp(signUpDto);
 
         //then
         verify(userRepository).save(any());
@@ -52,12 +52,12 @@ public class UserServiceTest {
     @DisplayName("회원가입 시 동일한 이메일이 이미 존재할 경우 예외를 던진다.")
     void existsByEmail(){
         //given
-        UserDto userDto = UserDto.builder().email("test123@gmail.com").password("1234").name("ILYA").phoneNumber("01012341234").build();
-        given(userRepository.existsByEmail(userDto.email())).willReturn(true);
+        SignUpDto dto = SignUpDto.builder().email("test123@gmail.com").password("1234").name("ILYA").phoneNumber("01012341234").build();
+        given(userRepository.existsByEmail(dto.email())).willReturn(true);
 
         //when, then
         Assertions.assertThatThrownBy(()->{
-            userService.signUp(userDto);
+            userService.signUp(dto);
         })
                 .isInstanceOf(UserEmailDuplicateException.class)
                 .hasMessageContaining("동일한 이메일을 소유한 유저가 이미 존재합니다.");
