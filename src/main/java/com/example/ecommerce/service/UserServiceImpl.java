@@ -2,6 +2,7 @@ package com.example.ecommerce.service;
 
 import com.example.ecommerce.common.exception.user.UserEmailDuplicateException;
 import com.example.ecommerce.common.exception.user.UserException;
+import com.example.ecommerce.dto.SignUpDto;
 import com.example.ecommerce.dto.UserDto;
 import com.example.ecommerce.entity.User;
 import com.example.ecommerce.repository.UserRepository;
@@ -20,7 +21,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Long signUp(UserDto dto) {
+    public Long signUp(SignUpDto dto) {
         if (userRepository.existsByEmail(dto.email())) {
             throw new UserEmailDuplicateException(UserException.DUPLICATE.getStatus(), UserException.DUPLICATE.getMessage());
         }

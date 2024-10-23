@@ -1,6 +1,6 @@
 package com.example.ecommerce.controller;
 
-import com.example.ecommerce.dto.UserDto;
+import com.example.ecommerce.dto.SignUpDto;
 import com.example.ecommerce.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,7 +16,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<Long> signUp(@RequestBody UserDto dto){
+    public ResponseEntity<Long> signUp(@RequestBody SignUpDto dto){
         Long userId = userService.signUp(dto);
         return new ResponseEntity<>(userId, HttpStatus.CREATED);
     }

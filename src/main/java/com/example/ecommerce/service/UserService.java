@@ -1,7 +1,7 @@
 package com.example.ecommerce.service;
 
-import com.example.ecommerce.dto.UserDto;
+import com.example.ecommerce.dto.SignUpDto;
 
 public interface UserService {
-    Long signUp(UserDto dto);
+    Long signUp(SignUpDto dto);
 }
