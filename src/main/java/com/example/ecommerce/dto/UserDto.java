@@ -24,6 +24,7 @@ public record UserDto(
         return User.builder()
                 .name(dto.name())
                 .email(dto.email())
+                .password(dto.password())
                 .phoneNumber(dto.phoneNumber())
                 .build();
     }
