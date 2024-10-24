@@ -5,7 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotNull;
 
-@Entity
+@Entity(name="products")
 @AttributeOverride(name = "id", column = @Column(name = "productId"))
 public class Product extends BaseEntity{
 
