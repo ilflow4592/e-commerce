@@ -1,6 +1,7 @@
 package com.example.ecommerce.common.exception;
 
 
+import com.example.ecommerce.common.exception.product.ProductNotFoundException;
 import com.example.ecommerce.common.exception.user.UserEmailDuplicateException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,10 +26,22 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, status);
     }
 
-
+    /**
+     * User Exception
+     */
     @ExceptionHandler(UserEmailDuplicateException.class)
     public ResponseEntity<Map<String, Object>> handleUserEmailDuplicateException(UserEmailDuplicateException ex) {
         log.warn("UserEmailDuplicateException 발생: {}", ex.getMessage(), ex);
+
+        return errorResponse(ex.getStatus(), ex.getMessage());
+    }
+
+    /**
+     *Product Exception
+     */
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleProductNotFoundException(ProductNotFoundException ex) {
+        log.warn("ProductNotFoundException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
     }
