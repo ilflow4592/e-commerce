@@ -1,4 +1,4 @@
-package com.example.ecommerce.dto;
+package com.example.ecommerce.dto.product;
 
 import com.example.ecommerce.entity.Product;
 import lombok.Builder;
@@ -19,5 +19,5 @@ public record CreateProductDto(
                 .stockQuantity(dto.stockQuantity)
                 .build();
     }
-    
+
 }

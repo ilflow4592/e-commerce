@@ -1,7 +1,7 @@
 package com.example.ecommerce.service;
 
 import com.example.ecommerce.common.exception.user.UserEmailDuplicateException;
-import com.example.ecommerce.dto.SignUpDto;
+import com.example.ecommerce.dto.user.SignUpDto;
 import com.example.ecommerce.entity.User;
 import com.example.ecommerce.repository.UserRepository;
 import org.assertj.core.api.Assertions;

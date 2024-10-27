@@ -1,4 +1,4 @@
-package com.example.ecommerce.dto;
+package com.example.ecommerce.dto.user;
 
 import com.example.ecommerce.entity.User;
 import lombok.Builder;
