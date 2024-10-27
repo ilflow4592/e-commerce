@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -18,16 +19,14 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
-
     @Mock
     private UserRepository userRepository;
-    private UserService userService;
+    @InjectMocks
+    private UserServiceImpl userService;
     private User user;
 
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userRepository); // 필요한 의존성을 수동으로 주입
-
         user = new User("ILYA", "test123@gmail.com","1234","01012341234");
         user.setId(1L);
     }

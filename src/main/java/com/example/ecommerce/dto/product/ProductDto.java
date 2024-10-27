@@ -1,6 +1,7 @@
 package com.example.ecommerce.dto.product;
 
 import lombok.Builder;
+import lombok.Getter;
 
 @Builder
 public record ProductDto(
