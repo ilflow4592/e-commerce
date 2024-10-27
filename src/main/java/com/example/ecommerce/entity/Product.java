@@ -1,6 +1,6 @@
 package com.example.ecommerce.entity;
 
-import com.example.ecommerce.dto.ProductDto;
+import com.example.ecommerce.dto.product.ProductDto;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

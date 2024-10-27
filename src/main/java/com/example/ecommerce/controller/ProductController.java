@@ -1,8 +1,8 @@
 package com.example.ecommerce.controller;
 
-import com.example.ecommerce.dto.CreateProductDto;
+import com.example.ecommerce.dto.product.CreateProductDto;
 import com.example.ecommerce.dto.PageableDto;
-import com.example.ecommerce.dto.ProductDto;
+import com.example.ecommerce.dto.product.ProductDto;
 import com.example.ecommerce.service.ProductService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;

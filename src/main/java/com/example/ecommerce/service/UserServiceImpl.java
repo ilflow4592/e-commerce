@@ -2,8 +2,8 @@ package com.example.ecommerce.service;
 
 import com.example.ecommerce.common.exception.user.UserEmailDuplicateException;
 import com.example.ecommerce.common.exception.user.UserException;
-import com.example.ecommerce.dto.SignUpDto;
-import com.example.ecommerce.dto.UserDto;
+import com.example.ecommerce.dto.user.SignUpDto;
+import com.example.ecommerce.dto.user.UserDto;
 import com.example.ecommerce.entity.User;
 import com.example.ecommerce.repository.UserRepository;
 import lombok.AllArgsConstructor;
