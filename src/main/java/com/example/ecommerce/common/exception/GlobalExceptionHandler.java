@@ -1,8 +1,11 @@
 package com.example.ecommerce.common.exception;
 
 
+import com.example.ecommerce.common.exception.order.OrderTotalPriceNotCorrectException;
 import com.example.ecommerce.common.exception.product.ProductNotFoundException;
+import com.example.ecommerce.common.exception.product.ProductOutOfStockException;
 import com.example.ecommerce.common.exception.user.UserEmailDuplicateException;
+import com.example.ecommerce.common.exception.user.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +39,13 @@ public class GlobalExceptionHandler {
         return errorResponse(ex.getStatus(), ex.getMessage());
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleUserNotFoundException(UserNotFoundException ex) {
+        log.warn("UserNotFoundException 발생: {}", ex.getMessage(), ex);
+
+        return errorResponse(ex.getStatus(), ex.getMessage());
+    }
+
     /**
      *Product Exception
      */
@@ -46,6 +56,22 @@ public class GlobalExceptionHandler {
         return errorResponse(ex.getStatus(), ex.getMessage());
     }
 
+    @ExceptionHandler(ProductOutOfStockException.class)
+    public ResponseEntity<Map<String, Object>> handleProductOutOfStockException(ProductOutOfStockException ex) {
+        log.warn("ProductOutOfStockException 발생: {}", ex.getMessage(), ex);
+
+        return errorResponse(ex.getStatus(), ex.getMessage());
+    }
+
+    /**
+     * Order Exception
+     */
+    @ExceptionHandler(OrderTotalPriceNotCorrectException.class)
+    public ResponseEntity<Map<String, Object>> handleOrderTotalPriceNotCorrectException(OrderTotalPriceNotCorrectException ex) {
+        log.warn("OrderTotalPriceNotCorrectException 발생: {}", ex.getMessage(), ex);
+
+        return errorResponse(ex.getStatus(), ex.getMessage());
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {
