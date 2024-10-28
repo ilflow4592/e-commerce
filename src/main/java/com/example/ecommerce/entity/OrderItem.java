@@ -1,5 +1,6 @@
 package com.example.ecommerce.entity;
 
+import com.example.ecommerce.dto.order_item.OrderItemDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -30,4 +31,14 @@ public class OrderItem extends BaseEntity{
 
     @NotNull
     private Integer price;
+
+    public static OrderItemDto toDto(OrderItem orderItem){
+       return OrderItemDto.builder()
+               .id(orderItem.getId())
+               .price(orderItem.product.getUnitPrice())
+               .quantity(orderItem.product.getStockQuantity())
+               .orderId(orderItem.order.getId())
+               .productId(orderItem.product.getId())
+               .build();
+    }
 }
