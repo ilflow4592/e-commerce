@@ -2,13 +2,13 @@ package com.example.ecommerce.dto.order;
 
 import lombok.Builder;
 
-import java.util.HashMap;
+import java.util.Map;
 
 @Builder
 public record CreateOrderDto(
         Long userId,
         Integer totalPrice,
-        HashMap<Long, Integer> productsMap // <productId : quantity>
+        Map<Long, Integer> productsMap // <productId : quantity>
 ) {
 
 }
