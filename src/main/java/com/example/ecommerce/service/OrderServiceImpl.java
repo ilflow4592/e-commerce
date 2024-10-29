@@ -1,5 +1,6 @@
 package com.example.ecommerce.service;
 
+import com.example.ecommerce.common.enums.order.OrderStatus;
 import com.example.ecommerce.common.exception.order.OrderException;
 import com.example.ecommerce.common.exception.order.OrderTotalPriceNotCorrectException;
 import com.example.ecommerce.common.exception.product.ProductException;
@@ -17,6 +18,7 @@ import com.example.ecommerce.repository.OrderRepository;
 import com.example.ecommerce.repository.ProductRepository;
 import com.example.ecommerce.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
@@ -34,18 +37,29 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final OrderItemRepository orderItemRepository;
 
-
     @Override
     @Transactional
     public Long createOrder(CreateOrderDto createOrderDto) {
         // 사용자 유효성 체크
         User user = validateUser(createOrderDto.userId());
 
+        Order order = Order.builder()
+                .user(user)
+                .totalPrice(createOrderDto.totalPrice())
+                .build();
+
         // 제품 유효성 및 가격 체크
         List<Product> products = validateProductsAndCalculateTotalPrice(createOrderDto);
 
-        // 주문 생성 및 저장
-        Order order = createAndSaveOrder(user, createOrderDto.totalPrice());
+        /**
+         * TODO: 결제 로직 추가(성공 - OrderStatus.PAID, 실패 - OrderStatus.FAILED)
+         * 그전까지는 그냥 결제를 했다고 가정
+         * try, catch로 묶어서 처리
+         */
+
+        // 주문 성공 시 상태 업데이트
+        order.fromCurrentOrderStatusTo(OrderStatus.PAID);
+        orderRepository.save(order);
 
         // 주문 아이템 생성 및 벌크 저장
         saveOrderItems(order, products, createOrderDto.productsMap());
@@ -90,14 +104,6 @@ public class OrderServiceImpl implements OrderService {
         return products;
     }
 
-    private Order createAndSaveOrder(User user, Integer totalPrice) {
-        Order order = Order.builder()
-                .user(user)
-                .totalPrice(totalPrice)
-                .build();
-        return orderRepository.save(order);
-    }
-
     private void saveOrderItems(Order order, List<Product> products, Map<Long, Integer> productsMap) {
         List<OrderItem> orderItems = new ArrayList<>();
 
@@ -125,4 +131,3 @@ public class OrderServiceImpl implements OrderService {
         orderItemRepository.saveAll(orderItems);  // 벌크 저장으로 성능 최적화
     }
 }
-
