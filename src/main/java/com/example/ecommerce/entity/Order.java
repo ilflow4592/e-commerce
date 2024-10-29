@@ -1,5 +1,6 @@
 package com.example.ecommerce.entity;
 
+import com.example.ecommerce.common.enums.order.OrderStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -26,4 +27,13 @@ public class Order extends BaseEntity{
 
     @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItems = new ArrayList<>();
+
+    @NotNull
+    @Enumerated(value = EnumType.STRING)
+    private OrderStatus orderStatus = OrderStatus.PENDING;
+
+    public void fromCurrentOrderStatusTo(OrderStatus orderStatus){
+        this.orderStatus = orderStatus;
+
+    }
 }
