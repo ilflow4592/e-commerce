@@ -1,16 +1,15 @@
 package com.example.ecommerce.entity;
 
 import com.example.ecommerce.common.enums.order.OrderStatus;
+import com.example.ecommerce.dto.order.OrderDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 @Entity(name = "orders")
 @AttributeOverride(name = "id", column = @Column(name = "orderId"))
 @Builder
@@ -36,6 +35,14 @@ public class Order extends BaseEntity{
 
     public void fromCurrentOrderStatusTo(OrderStatus orderStatus){
         this.orderStatus = orderStatus;
+    }
 
+    public static OrderDto toDto(Order order){
+        return OrderDto.builder()
+                .user(order.getUser())
+                .totalPrice(order.getTotalPrice())
+                .orderItems(order.getOrderItems())
+                .orderStatus(order.getOrderStatus())
+                .build();
     }
 }
