@@ -27,7 +27,7 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<PageableDto<ProductDto>> getAllProducts(Pageable pageable){
         PageableDto<ProductDto> pageableProductDto = productService.getAllProducts(pageable);
-        return new ResponseEntity<>(pageableProductDto, HttpStatus.CREATED);
+        return new ResponseEntity<>(pageableProductDto, HttpStatus.OK);
     }
 
     @GetMapping("{id}")
