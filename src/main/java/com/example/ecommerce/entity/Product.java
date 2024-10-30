@@ -44,5 +44,9 @@ public class Product extends BaseEntity{
         if (dto.stockQuantity() != null) this.stockQuantity = dto.stockQuantity();
     }
 
+    public void updateStockQuantity(Integer stockQuantity){
+        this.stockQuantity = stockQuantity;
+    }
+
 
 }

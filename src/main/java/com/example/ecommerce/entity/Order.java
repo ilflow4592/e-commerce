@@ -25,9 +25,11 @@ public class Order extends BaseEntity{
     @NotNull
     private Integer totalPrice;
 
+    @Builder.Default
     @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    @Builder.Default
     @NotNull
     @Enumerated(value = EnumType.STRING)
     private OrderStatus orderStatus = OrderStatus.PENDING;
