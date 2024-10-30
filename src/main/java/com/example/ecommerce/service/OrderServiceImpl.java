@@ -2,13 +2,16 @@ package com.example.ecommerce.service;
 
 import com.example.ecommerce.common.enums.order.OrderStatus;
 import com.example.ecommerce.common.exception.order.OrderException;
+import com.example.ecommerce.common.exception.order.OrderNotFoundException;
 import com.example.ecommerce.common.exception.order.OrderTotalPriceNotCorrectException;
 import com.example.ecommerce.common.exception.product.ProductException;
 import com.example.ecommerce.common.exception.product.ProductNotFoundException;
 import com.example.ecommerce.common.exception.product.ProductOutOfStockException;
 import com.example.ecommerce.common.exception.user.UserException;
 import com.example.ecommerce.common.exception.user.UserNotFoundException;
+import com.example.ecommerce.dto.PageableDto;
 import com.example.ecommerce.dto.order.CreateOrderDto;
+import com.example.ecommerce.dto.order.OrderDto;
 import com.example.ecommerce.entity.Order;
 import com.example.ecommerce.entity.OrderItem;
 import com.example.ecommerce.entity.Product;
@@ -19,6 +22,8 @@ import com.example.ecommerce.repository.ProductRepository;
 import com.example.ecommerce.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,6 +70,13 @@ public class OrderServiceImpl implements OrderService {
         saveOrderItems(order, products, createOrderDto.productsMap());
 
         return order.getId();
+    }
+
+    @Override
+    public PageableDto<OrderDto> getAllOrders(Pageable pageable) {
+        Page<Order> pageableOrders = orderRepository.findAll(pageable);
+
+        return PageableDto.toDto(pageableOrders.map(Order::toDto));
     }
 
     private User validateUser(Long userId) {
@@ -130,4 +142,13 @@ public class OrderServiceImpl implements OrderService {
 
         orderItemRepository.saveAll(orderItems);  // 벌크 저장으로 성능 최적화
     }
+
+    @Override
+    public OrderDto getOrder(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException(OrderException.NOTFOUND.getStatus(), OrderException.NOTFOUND.getMessage()));
+
+        return Order.toDto(order);
+    }
+
 }
