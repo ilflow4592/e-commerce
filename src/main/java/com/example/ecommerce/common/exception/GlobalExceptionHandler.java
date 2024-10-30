@@ -1,6 +1,7 @@
 package com.example.ecommerce.common.exception;
 
 
+import com.example.ecommerce.common.exception.order.OrderNotFoundException;
 import com.example.ecommerce.common.exception.order.OrderTotalPriceNotCorrectException;
 import com.example.ecommerce.common.exception.order_item.OrderItemNotFoundException;
 import com.example.ecommerce.common.exception.product.ProductNotFoundException;
@@ -70,6 +71,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OrderTotalPriceNotCorrectException.class)
     public ResponseEntity<Map<String, Object>> handleOrderTotalPriceNotCorrectException(OrderTotalPriceNotCorrectException ex) {
         log.warn("OrderTotalPriceNotCorrectException 발생: {}", ex.getMessage(), ex);
+
+        return errorResponse(ex.getStatus(), ex.getMessage());
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleOrderNotFoundException(OrderNotFoundException ex) {
+        log.warn("OrderNotFoundException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
     }
