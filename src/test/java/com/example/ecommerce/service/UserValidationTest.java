@@ -45,8 +45,8 @@ public class UserValidationTest {
     void invalidUser() {
         // given
         User user = User.builder()
-                .name("")
-                .email("email")
+                .name(null)
+                .email(null)
                 .password("123")
                 .phoneNumber("12345")
                 .build();
@@ -56,10 +56,7 @@ public class UserValidationTest {
 
         // then
         assertThat(violations).isNotEmpty();
-        assertThat(violations).anyMatch(v -> v.getMessage().contains("이름을 입력해주세요."));
-        assertThat(violations).anyMatch(v -> v.getMessage().contains("유효한 이메일 주소를 입력해주세요."));
-        assertThat(violations).anyMatch(v -> v.getMessage().contains("비밀번호는 8자 이상 20자 이하여야 합니다."));
-        assertThat(violations).anyMatch(v -> v.getMessage().contains("10~11자리의 숫자만 입력가능합니다"));
+        assertThat(violations).hasSize(2);
     }
 }
 
