@@ -5,6 +5,8 @@ import com.example.ecommerce.dto.order.OrderDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,7 @@ public class Order extends BaseEntity{
 
     @Builder.Default
     @OneToMany(mappedBy = "order")
+    @Cascade(CascadeType.REMOVE)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @Builder.Default

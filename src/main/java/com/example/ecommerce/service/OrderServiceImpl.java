@@ -151,4 +151,13 @@ public class OrderServiceImpl implements OrderService {
         return Order.toDto(order);
     }
 
+    @Override
+    @Transactional
+    public void deleteOrder(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException(OrderException.NOTFOUND.getStatus(), OrderException.NOTFOUND.getMessage()));
+
+        orderRepository.delete(order);
+    }
+
 }
