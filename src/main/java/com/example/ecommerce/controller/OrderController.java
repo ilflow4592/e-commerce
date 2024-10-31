@@ -33,8 +33,12 @@ public class OrderController {
     public ResponseEntity<OrderDto> getAllOrders(@PathVariable Long id){
         OrderDto orderDto = orderService.getOrder(id);
         return new ResponseEntity<>(orderDto,HttpStatus.OK);
+    }
 
-
+    @DeleteMapping("{id}")
+    public ResponseEntity<String> deleteOrder(@PathVariable Long id){
+        orderService.deleteOrder(id);
+        return ResponseEntity.ok("id = " + id + "인 주문이 성공적으로 삭제되었습니다.");
     }
 
 
