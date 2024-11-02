@@ -22,3 +22,8 @@ logging.level:
   org.hibernate.SQL: debug
   # org.hibernate.type: trace
 
+
+port-one-api:
+  auth:
+    token: "jJuucB7xOS9eivGl87yUTLzQpBONMhMuXZ6t2SByd2CH4FXQDYBvbnfqMOcQu8LSNoVib9JMCyqsrcY7"
+
