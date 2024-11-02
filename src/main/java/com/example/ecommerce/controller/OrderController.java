@@ -5,21 +5,22 @@ import com.example.ecommerce.dto.order.CreateOrderDto;
 import com.example.ecommerce.dto.order.OrderDto;
 import com.example.ecommerce.service.OrderService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/orders")
 @AllArgsConstructor
+@Slf4j
 public class OrderController {
 
     private final OrderService orderService;
 
-    @PostMapping
-    public ResponseEntity<Long> createOrder(@RequestBody CreateOrderDto createOrderDto){
-        Long orderId = orderService.createOrder(createOrderDto);
+    @PostMapping("/verify/{paymentId}")
+    public ResponseEntity<Long> verifyPaymentAndCreateOrder(@PathVariable String paymentId, @RequestBody CreateOrderDto createOrderDto){
+        Long orderId = orderService.verifyPaymentAndCreateOrder(paymentId, createOrderDto);
         return new ResponseEntity<>(orderId, HttpStatus.CREATED);
     }
 
@@ -40,8 +41,6 @@ public class OrderController {
         orderService.deleteOrder(id);
         return ResponseEntity.ok("id = " + id + "인 주문이 성공적으로 삭제되었습니다.");
     }
-
-
 
 
 }
