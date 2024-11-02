@@ -4,6 +4,7 @@ package com.example.ecommerce.common.exception;
 import com.example.ecommerce.common.exception.order.OrderNotFoundException;
 import com.example.ecommerce.common.exception.order.OrderTotalPriceNotCorrectException;
 import com.example.ecommerce.common.exception.order_item.OrderItemNotFoundException;
+import com.example.ecommerce.common.exception.port_one.PortOneNotFoundPaymentException;
 import com.example.ecommerce.common.exception.product.ProductNotFoundException;
 import com.example.ecommerce.common.exception.product.ProductOutOfStockException;
 import com.example.ecommerce.common.exception.user.UserEmailDuplicateException;
@@ -88,6 +89,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OrderItemNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleOrderItemNotFoundException(OrderItemNotFoundException ex) {
         log.warn("OrderItemNotFoundException 발생: {}", ex.getMessage(), ex);
+
+        return errorResponse(ex.getStatus(), ex.getMessage());
+    }
+
+    /**
+     * PortOne Exception
+     */
+    @ExceptionHandler(PortOneNotFoundPaymentException.class)
+    public ResponseEntity<Map<String, Object>> handlePortOneNotFoundPaymentException(PortOneNotFoundPaymentException ex) {
+        log.warn("PortOneNotFoundPaymentException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
     }
