@@ -6,7 +6,7 @@ import com.example.ecommerce.dto.order.OrderDto;
 import org.springframework.data.domain.Pageable;
 
 public interface OrderService {
-    Long createOrder(CreateOrderDto createOrderDto);
+    Long verifyPaymentAndCreateOrder(String paymentId, CreateOrderDto createOrderDto);
     PageableDto<OrderDto> getAllOrders(Pageable pageable);
     OrderDto getOrder(Long id);
     void deleteOrder(Long id);
