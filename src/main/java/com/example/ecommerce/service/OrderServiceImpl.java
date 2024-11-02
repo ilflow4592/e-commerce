@@ -1,5 +1,6 @@
 package com.example.ecommerce.service;
 
+import com.example.ecommerce.api.port_one.PortOnePayment;
 import com.example.ecommerce.common.enums.order.OrderStatus;
 import com.example.ecommerce.common.exception.order.OrderException;
 import com.example.ecommerce.common.exception.order.OrderNotFoundException;
@@ -12,14 +13,9 @@ import com.example.ecommerce.common.exception.user.UserNotFoundException;
 import com.example.ecommerce.dto.PageableDto;
 import com.example.ecommerce.dto.order.CreateOrderDto;
 import com.example.ecommerce.dto.order.OrderDto;
-import com.example.ecommerce.entity.Order;
-import com.example.ecommerce.entity.OrderItem;
-import com.example.ecommerce.entity.Product;
-import com.example.ecommerce.entity.User;
-import com.example.ecommerce.repository.OrderItemRepository;
-import com.example.ecommerce.repository.OrderRepository;
-import com.example.ecommerce.repository.ProductRepository;
-import com.example.ecommerce.repository.UserRepository;
+import com.example.ecommerce.dto.port_one.PortOneGetPaymentResponseDto;
+import com.example.ecommerce.entity.*;
+import com.example.ecommerce.repository.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -42,9 +38,14 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final OrderItemRepository orderItemRepository;
 
+
+    private final PortOnePayment portOnePayment;
+    private final PaymentRepository paymentRepository;
+
     @Override
     @Transactional
-    public Long createOrder(CreateOrderDto createOrderDto) {
+    public Long verifyPaymentAndCreateOrder(String paymentId, CreateOrderDto createOrderDto) {
+
         // 사용자 유효성 체크
         User user = validateUser(createOrderDto.userId());
 
@@ -56,18 +57,18 @@ public class OrderServiceImpl implements OrderService {
         // 제품 유효성 및 가격 체크
         List<Product> products = validateProductsAndCalculateTotalPrice(createOrderDto);
 
-        /**
-         * TODO: 결제 로직 추가(성공 - OrderStatus.PAID, 실패 - OrderStatus.FAILED)
-         * 그전까지는 그냥 결제를 했다고 가정
-         * try, catch로 묶어서 처리
-         */
+        // 포트원으로부터 결제 정보를 불러옴
+        PortOneGetPaymentResponseDto paymentDto = portOnePayment.getPayment(paymentId);
 
-        // 주문 성공 시 상태 업데이트
+        // 결제 정보 존재할 시 주문 상태 업데이트 및 저장
         order.fromCurrentOrderStatusTo(OrderStatus.PAID);
-        orderRepository.save(order);
+        Long orderId = orderRepository.save(order).getId();
 
         // 주문 아이템 생성 및 벌크 저장
         saveOrderItems(order, products, createOrderDto.productsMap());
+
+        Payment payment = PortOneGetPaymentResponseDto.toEntity(paymentDto, orderId);
+        paymentRepository.save(payment);
 
         return order.getId();
     }
