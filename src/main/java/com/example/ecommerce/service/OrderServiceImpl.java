@@ -124,7 +124,7 @@ public class OrderServiceImpl implements OrderService {
             Integer quantity = productsMap.get(product.getId());
 
             // 재고 체크
-            if ((product.getStockQuantity() - quantity) < 0) {
+            if ((product.getStockQuantity() - quantity) <= 0) {
                 throw new ProductOutOfStockException(
                         ProductException.OUT_OF_STOCK.getStatus(),
                         ProductException.OUT_OF_STOCK.getMessage()
