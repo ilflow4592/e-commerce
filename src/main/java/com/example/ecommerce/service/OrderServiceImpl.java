@@ -73,13 +73,6 @@ public class OrderServiceImpl implements OrderService {
         return order.getId();
     }
 
-    @Override
-    public PageableDto<OrderDto> getAllOrders(Pageable pageable) {
-        Page<Order> pageableOrders = orderRepository.findAll(pageable);
-
-        return PageableDto.toDto(pageableOrders.map(Order::toDto));
-    }
-
     private User validateUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(
@@ -142,6 +135,13 @@ public class OrderServiceImpl implements OrderService {
         }
 
         orderItemRepository.saveAll(orderItems);  // 벌크 저장으로 성능 최적화
+    }
+
+    @Override
+    public PageableDto<OrderDto> getAllOrders(Pageable pageable) {
+        Page<Order> pageableOrders = orderRepository.findAll(pageable);
+
+        return PageableDto.toDto(pageableOrders.map(Order::toDto));
     }
 
     @Override
