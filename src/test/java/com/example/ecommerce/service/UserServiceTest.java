@@ -1,6 +1,7 @@
 package com.example.ecommerce.service;
 
 import com.example.ecommerce.common.exception.user.UserEmailDuplicateException;
+import com.example.ecommerce.common.exception.user.UserException;
 import com.example.ecommerce.dto.user.SignUpDto;
 import com.example.ecommerce.entity.User;
 import com.example.ecommerce.repository.UserRepository;
@@ -59,6 +60,6 @@ public class UserServiceTest {
             userService.signUp(dto);
         })
                 .isInstanceOf(UserEmailDuplicateException.class)
-                .hasMessageContaining("동일한 이메일을 소유한 유저가 이미 존재합니다.");
+                .hasMessageContaining(UserException.DUPLICATE.getMessage());
     }
 }
