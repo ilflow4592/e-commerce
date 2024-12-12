@@ -4,16 +4,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CartItem extends BaseEntity {
+@Getter
+public class CartHasProduct extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "cart_id")
@@ -29,4 +27,9 @@ public class CartItem extends BaseEntity {
 
     @NotNull
     private Integer totalPrice;
+
+    public void updateCartHasProduct(Integer quantity, Integer unitPrice){
+        this.quantity += quantity;
+        this.totalPrice += quantity*unitPrice;
+    }
 }

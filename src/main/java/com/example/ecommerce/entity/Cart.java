@@ -2,10 +2,7 @@ package com.example.ecommerce.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -13,6 +10,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class Cart extends BaseEntity{
 
     @NotNull
@@ -21,14 +19,15 @@ public class Cart extends BaseEntity{
     private User user;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartItem> cartItems;
+    private List<CartHasProduct> cartHasProducts;
 
-    public void addItem(Product product) {
-        this.cartItems.add(
-                CartItem.builder()
+    public void addProduct(Product product, Integer quantity) {
+        this.cartHasProducts.add(
+                CartHasProduct.builder()
                 .cart(this)
                 .product(product)
-                .totalPrice(product.getUnitPrice())
+                .quantity(quantity)
+                .totalPrice(product.getUnitPrice()*quantity)
                 .build()
         );
     }
