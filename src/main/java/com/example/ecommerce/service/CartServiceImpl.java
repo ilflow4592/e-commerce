@@ -5,7 +5,8 @@ import com.example.ecommerce.common.exception.product.ProductNotFoundException;
 import com.example.ecommerce.common.exception.product.ProductOutOfStockException;
 import com.example.ecommerce.common.exception.user.UserException;
 import com.example.ecommerce.common.exception.user.UserNotFoundException;
-import com.example.ecommerce.dto.cart.CartDto;
+import com.example.ecommerce.dto.cart.AddToCartDto;
+import com.example.ecommerce.dto.cart.RemoveFromCartDto;
 import com.example.ecommerce.entity.Cart;
 import com.example.ecommerce.entity.CartHasProduct;
 import com.example.ecommerce.entity.Product;
@@ -32,42 +33,79 @@ public class CartServiceImpl implements CartService{
 
     @Override
     @Transactional
-    public Long addProduct(CartDto dto) {
-        Product product = productRepository.findById(dto.productId())
-                .orElseThrow(() -> new ProductNotFoundException(ProductException.NOTFOUND.getStatus(), ProductException.NOTFOUND.getMessage()));
+    public Long addProduct(AddToCartDto dto) {
+        Product product = findProductById(dto.productId());
+        validateStockAvailability(product, dto.quantity());
+        User user = findUserById(dto.userId());
+        Cart cart = findOrCreateCart(user);
 
-        //상품 재고 체크
-        if ((product.getStockQuantity() - dto.quantity()) <= 0) {
-            throw new ProductOutOfStockException(
-                    ProductException.OUT_OF_STOCK.getStatus(),
-                    ProductException.OUT_OF_STOCK.getMessage()
-            );
-        }
+        updateCartWithProduct(cart, product, dto.quantity());
 
-        User user = userRepository.findById(dto.userId())
-                .orElseThrow(() -> new UserNotFoundException(UserException.NOTFOUND.getStatus(), UserException.NOTFOUND.getMessage()));
+        return cartRepository.save(cart).getId();
+    }
 
-        Cart cart = cartRepository.findByUser(user)
-                .orElseGet(() -> Cart.builder()
-                        .user(user)
-                        .cartHasProducts(new ArrayList<>())
-                        .build());
-
+    @Override
+    @Transactional
+    public Long removeProduct(RemoveFromCartDto dto) {
+        Product product = findProductById(dto.productId());
+        User user = findUserById(dto.userId());
+        Cart cart = findOrCreateCart(user);
         List<CartHasProduct> cartHasProducts = cart.getCartHasProducts();
-        //상품이 cartHasProducts 내부에 존재하는지 체크
+
         int index = getProductIndex(cartHasProducts, product.getId());
 
-        //있을 때 -> 기존 상품의 수량과 가격을 업데이트
-        if(index != -1){
-            cartHasProducts.get(index).updateCartHasProduct(dto.quantity(), product.getUnitPrice());
-        }else{
-            //없을 때 -> 새로운 상품을 추가
-            cart.addProduct(product, dto.quantity());
+        if (index != -1) {
+            cartHasProducts.get(index).removeProductUpdate(product.getUnitPrice());
         }
 
         cartRepository.save(cart);
 
         return cart.getId();
+    }
+
+    private Product findProductById(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(
+                        ProductException.NOTFOUND.getStatus(),
+                        ProductException.NOTFOUND.getMessage()
+                ));
+    }
+
+    private void validateStockAvailability(Product product, int quantity) {
+        if (product.getStockQuantity() < quantity) {
+            throw new ProductOutOfStockException(
+                    ProductException.OUT_OF_STOCK.getStatus(),
+                    ProductException.OUT_OF_STOCK.getMessage()
+            );
+        }
+    }
+
+    private User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(
+                        UserException.NOTFOUND.getStatus(),
+                        UserException.NOTFOUND.getMessage()
+                ));
+    }
+
+    private Cart findOrCreateCart(User user) {
+        return cartRepository.findByUser(user)
+                .orElseGet(() -> Cart.builder()
+                        .user(user)
+                        .cartHasProducts(new ArrayList<>())
+                        .build());
+    }
+
+    private void updateCartWithProduct(Cart cart, Product product, int quantity) {
+        List<CartHasProduct> cartHasProducts = cart.getCartHasProducts();
+
+        int index = getProductIndex(cartHasProducts, product.getId());
+
+        if (index != -1) {
+            cartHasProducts.get(index).addProductUpdate(quantity, product.getUnitPrice());
+        } else {
+            cart.addProduct(product, quantity);
+        }
     }
 
     private int getProductIndex(List<CartHasProduct> cartHasProducts, Long productId) {
@@ -77,6 +115,6 @@ public class CartServiceImpl implements CartService{
                     return product != null && product.getId().equals(productId);
                 })
                 .findFirst()
-                .orElse(-1); // 조건에 맞는 인덱스가 없으면 -1 반환
+                .orElse(-1);
     }
 }
