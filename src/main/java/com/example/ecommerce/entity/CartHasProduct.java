@@ -28,8 +28,13 @@ public class CartHasProduct extends BaseEntity {
     @NotNull
     private Integer totalPrice;
 
-    public void updateCartHasProduct(Integer quantity, Integer unitPrice){
+    public void addProductUpdate(Integer quantity, Integer unitPrice){
         this.quantity += quantity;
         this.totalPrice += quantity*unitPrice;
+    }
+
+    public void removeProductUpdate(Integer unitPrice){
+        this.quantity -= 1;
+        this.totalPrice -= unitPrice;
     }
 }

@@ -1,6 +1,6 @@
 package com.example.ecommerce.dto.cart;
 
-public record CartDto(
+public record AddToCartDto(
         Long userId,
         Long productId,
         Integer quantity

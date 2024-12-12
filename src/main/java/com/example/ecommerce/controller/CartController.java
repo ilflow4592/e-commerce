@@ -1,6 +1,7 @@
 package com.example.ecommerce.controller;
 
-import com.example.ecommerce.dto.cart.CartDto;
+import com.example.ecommerce.dto.cart.AddToCartDto;
+import com.example.ecommerce.dto.cart.RemoveFromCartDto;
 import com.example.ecommerce.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +17,17 @@ public class CartController {
 
     private final CartService cartService;
 
-    @PostMapping("/items/add")
-    public ResponseEntity<Long> addProduct(@RequestBody CartDto dto) {
+    @PostMapping("/products/add")
+    public ResponseEntity<Long> addProduct(@RequestBody AddToCartDto dto) {
         Long cartId = cartService.addProduct(dto);
         return ResponseEntity.ok(cartId);
     }
 
-    //TODO : quantity up & down update.
+    @PostMapping("/products/remove")
+    public ResponseEntity<Long> removeProduct(@RequestBody RemoveFromCartDto dto) {
+        Long cartId = cartService.removeProduct(dto);
+        return ResponseEntity.ok(cartId);
+    }
+
+
 }
