@@ -33,7 +33,7 @@ public class CartServiceImpl implements CartService{
 
     @Override
     @Transactional
-    public Long addProduct(AddToCartDto dto) {
+    public void addProduct(AddToCartDto dto) {
         Product product = findProductById(dto.productId());
         validateStockAvailability(product, dto.quantity());
         User user = findUserById(dto.userId());
@@ -41,12 +41,12 @@ public class CartServiceImpl implements CartService{
 
         updateCartWithProduct(cart, product, dto.quantity());
 
-        return cartRepository.save(cart).getId();
+        cartRepository.save(cart);
     }
 
     @Override
     @Transactional
-    public Long removeProduct(RemoveFromCartDto dto) {
+    public void removeProduct(RemoveFromCartDto dto) {
         Product product = findProductById(dto.productId());
         User user = findUserById(dto.userId());
         Cart cart = findOrCreateCart(user);
@@ -60,7 +60,6 @@ public class CartServiceImpl implements CartService{
 
         cartRepository.save(cart);
 
-        return cart.getId();
     }
 
     private Product findProductById(Long productId) {

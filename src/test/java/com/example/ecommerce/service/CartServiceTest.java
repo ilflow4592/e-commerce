@@ -72,11 +72,9 @@ public class CartServiceTest {
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
         // when
-        Long cartId = cartService.addProduct(dto);
+        cartService.addProduct(dto);
 
         // then
-        assertNotNull(cartId);
-        assertEquals(1L, cartId);
         verify(productRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).findById(1L);
         verify(cartRepository, times(1)).findByUser(user);
@@ -112,12 +110,8 @@ public class CartServiceTest {
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
-        // when
-        Long cartId = cartService.removeProduct(dto);
 
-        // then
-        assertNotNull(cartId);
-        assertEquals(1L, cartId);
+        // when,then
         assertTrue(cart.getCartHasProducts().isEmpty());
         verify(productRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).findById(1L);
@@ -135,12 +129,8 @@ public class CartServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
 
-        // when
-        Long cartId = cartService.removeProduct(dto);
 
-        // then
-        assertNotNull(cartId);
-        assertEquals(1L, cartId);
+        // when,then
         assertTrue(cart.getCartHasProducts().isEmpty());
         verify(productRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).findById(1L);
