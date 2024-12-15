@@ -2,6 +2,7 @@ package com.example.ecommerce.entity;
 
 import com.example.ecommerce.common.enums.order.OrderStatus;
 import com.example.ecommerce.dto.order.OrderDto;
+import com.example.ecommerce.dto.user.UserDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -42,7 +43,7 @@ public class Order extends BaseEntity{
 
     public static OrderDto toDto(Order order){
         return OrderDto.builder()
-                .user(order.getUser())
+                .userDto(UserDto.toDto(order.getUser()))
                 .totalPrice(order.getTotalPrice())
                 .orderItems(order.getOrderItems())
                 .orderStatus(order.getOrderStatus())
