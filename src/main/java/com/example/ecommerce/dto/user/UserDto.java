@@ -1,21 +1,22 @@
 package com.example.ecommerce.dto.user;
 
 import com.example.ecommerce.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 
 @Builder
 public record UserDto(
-        Long id,
+        Long userId,
+        @JsonIgnore
         String name,
         String email,
+        @JsonIgnore
         String phoneNumber) {
 
     public static UserDto toDto(User user) {
         return UserDto.builder()
-                .id(user.getId())
-                .name(user.getName())
+                .userId(user.getId())
                 .email(user.getEmail())
-                .phoneNumber(user.getPhoneNumber())
                 .build();
     }
 
