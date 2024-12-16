@@ -221,9 +221,9 @@ public class OrderServiceTest {
 
         // then
         assertNotNull(result);
-        assertEquals(order.getUser(), result.user());
+        assertEquals(order.getUser(), result.userDto());
         assertEquals(order.getTotalPrice(), result.totalPrice());
-        assertEquals(order.getOrderItems(), result.orderItems());
+        assertEquals(order.getOrderItems(), result.orderItemsDto());
         assertEquals(order.getOrderStatus(), result.orderStatus());
         verify(orderRepository, times(1)).findById(1L);
     }
