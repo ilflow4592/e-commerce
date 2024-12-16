@@ -124,6 +124,8 @@ public class OrderServiceImpl implements OrderService {
                 );
             }
 
+            product.updateStockQuantity(product.getStockQuantity()-quantity);
+
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
                     .product(product)
