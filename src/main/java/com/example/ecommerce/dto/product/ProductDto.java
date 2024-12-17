@@ -1,5 +1,7 @@
 package com.example.ecommerce.dto.product;
 
+import com.example.ecommerce.common.enums.product.Category;
+import com.example.ecommerce.common.enums.product.Size;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,7 +11,9 @@ public record ProductDto(
         String name,
         String description,
         Integer unitPrice,
-        Integer stockQuantity
+        Integer stockQuantity,
+        Category category,
+        Size size
 ) {
 
 
