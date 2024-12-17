@@ -1,9 +1,10 @@
 package com.example.ecommerce.entity;
 
+import com.example.ecommerce.common.enums.product.Category;
+import com.example.ecommerce.common.enums.product.CategoryConverter;
+import com.example.ecommerce.common.enums.product.Size;
 import com.example.ecommerce.dto.product.ProductDto;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -26,6 +27,15 @@ public class Product extends BaseEntity{
 
     @NotNull
     private Integer stockQuantity;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Convert(converter = CategoryConverter.class)
+    private Category category;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private Size size;
 
     public static ProductDto toDto(Product product){
         return ProductDto.builder()
