@@ -1,6 +1,8 @@
 package com.example.ecommerce.service;
 
 import com.example.ecommerce.api.port_one.PortOnePayment;
+import com.example.ecommerce.common.enums.product.Category;
+import com.example.ecommerce.common.enums.product.Size;
 import com.example.ecommerce.common.exception.order.OrderNotFoundException;
 import com.example.ecommerce.common.exception.product.ProductException;
 import com.example.ecommerce.common.exception.product.ProductNotFoundException;
@@ -75,7 +77,7 @@ public class OrderServiceTest {
         user = new User("ILYA", "test123@gmail.com","1234","01012341234");
         user.setId(1L);
 
-        product = new Product("패딩 점퍼", "방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.", 50000, 10);
+        product = new Product("패딩 점퍼", "방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.", 50000, 10, Category.OUTER, Size.L);
         product.setId(1L);
 
 //        //50,000*2=100,000

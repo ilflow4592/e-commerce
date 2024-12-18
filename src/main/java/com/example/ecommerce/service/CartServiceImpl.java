@@ -55,7 +55,15 @@ public class CartServiceImpl implements CartService{
         int index = getProductIndex(cartHasProducts, product.getId());
 
         if (index != -1) {
-            cartHasProducts.get(index).removeProductUpdate(product.getUnitPrice());
+            CartHasProduct cartHasProduct = cartHasProducts.get(index);
+
+            // 수량 감소 및 업데이트
+            cartHasProduct.removeProductUpdate(product.getUnitPrice());
+
+            // 수량이 0이면 리스트에서 제거
+            if (cartHasProduct.getQuantity() <= 0) {
+                cartHasProducts.remove(index);
+            }
         }
 
         cartRepository.save(cart);
