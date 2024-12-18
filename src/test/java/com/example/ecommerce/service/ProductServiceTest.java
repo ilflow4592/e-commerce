@@ -1,5 +1,7 @@
 package com.example.ecommerce.service;
 
+import com.example.ecommerce.common.enums.product.Category;
+import com.example.ecommerce.common.enums.product.Size;
 import com.example.ecommerce.common.exception.product.ProductNotFoundException;
 import com.example.ecommerce.dto.PageableDto;
 import com.example.ecommerce.dto.product.CreateProductDto;
@@ -36,10 +38,10 @@ public class ProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        product = new Product("패딩 점퍼", "방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.", 50000, 10);
+        product = new Product("패딩 점퍼", "방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.", 50000, 10 , Category.OUTER, Size.L);
         product.setId(1L);
 
-        productDto = new ProductDto(1L, "패딩 점퍼", "방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.", 50000, 100);
+        productDto = new ProductDto(1L, "패딩 점퍼", "방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.", 50000, 100, Category.OUTER, Size.L);
     }
 
     @Test
@@ -50,7 +52,9 @@ public class ProductServiceTest {
                 "패딩 점퍼",
                 "방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.",
                 50000,
-                100
+                100,
+                Category.OUTER,
+                Size.L
         );
         when(productRepository.save(any(Product.class))).thenReturn(product);
 

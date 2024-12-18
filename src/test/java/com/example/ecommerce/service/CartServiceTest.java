@@ -1,5 +1,7 @@
 package com.example.ecommerce.service;
 
+import com.example.ecommerce.common.enums.product.Category;
+import com.example.ecommerce.common.enums.product.Size;
 import com.example.ecommerce.common.exception.product.ProductOutOfStockException;
 import com.example.ecommerce.dto.cart.AddToCartDto;
 import com.example.ecommerce.dto.cart.RemoveFromCartDto;
@@ -19,11 +21,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,7 +50,7 @@ public class CartServiceTest {
         user = new User("test_user", "test@example.com", "password", "1234567890");
         user.setId(1L);
 
-        product = new Product("Test Product", "A sample product", 1000, 10);
+        product = new Product("Test Product", "A sample product", 1000, 10, Category.OUTER, Size.L);
         product.setId(1L);
 
         cart = Cart.builder()
@@ -69,7 +69,6 @@ public class CartServiceTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
-        when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
         // when
         cartService.addProduct(dto);
@@ -78,7 +77,12 @@ public class CartServiceTest {
         verify(productRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).findById(1L);
         verify(cartRepository, times(1)).findByUser(user);
-        verify(cartRepository, times(1)).save(any(Cart.class));
+        verify(cartRepository, times(1)).save(cart);
+
+        assertEquals(1, cart.getCartHasProducts().size());
+        CartHasProduct cartHasProduct = cart.getCartHasProducts().get(0);
+        assertEquals(product, cartHasProduct.getProduct());
+        assertEquals(2, cartHasProduct.getQuantity());
     }
 
     @Test
@@ -91,8 +95,10 @@ public class CartServiceTest {
 
         // when, then
         assertThrows(ProductOutOfStockException.class, () -> cartService.addProduct(dto));
+
         verify(productRepository, times(1)).findById(1L);
         verifyNoInteractions(userRepository);
+        verifyNoInteractions(cartRepository);
     }
 
     @Test
@@ -101,22 +107,23 @@ public class CartServiceTest {
         // given
         RemoveFromCartDto dto = new RemoveFromCartDto(1L, 1L);
 
-        CartHasProduct cartHasProduct = new CartHasProduct(cart, product, 2, 2000);
-        List<CartHasProduct> cartHasProducts = new ArrayList<>();
-        cartHasProducts.add(cartHasProduct);
+        CartHasProduct cartHasProduct = new CartHasProduct(cart, product, 1, 2000);
+        cart.getCartHasProducts().add(cartHasProduct);
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
-        when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
+        // when
+        cartService.removeProduct(dto);
 
-        // when,then
-        assertTrue(cart.getCartHasProducts().isEmpty());
+        // then
         verify(productRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).findById(1L);
         verify(cartRepository, times(1)).findByUser(user);
-        verify(cartRepository, times(1)).save(any(Cart.class));
+        verify(cartRepository, times(1)).save(cart);
+
+        assertTrue(cart.getCartHasProducts().isEmpty());
     }
 
     @Test
@@ -129,11 +136,16 @@ public class CartServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
 
+        // when
+        cartService.removeProduct(dto);
 
-        // when,then
-        assertTrue(cart.getCartHasProducts().isEmpty());
+        // then
         verify(productRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).findById(1L);
         verify(cartRepository, times(1)).findByUser(user);
+        verify(cartRepository, times(1)).save(cart);
+
+        assertTrue(cart.getCartHasProducts().isEmpty());
     }
 }
+
