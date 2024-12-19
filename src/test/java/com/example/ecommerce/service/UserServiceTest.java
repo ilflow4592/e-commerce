@@ -28,8 +28,14 @@ public class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = new User("ILYA", "test123@gmail.com","1234","01012341234");
-        user.setId(1L);
+        user = User.builder()
+                .id(1L)
+                .name("ILYA")
+                .email("test@naver.com")
+                .password("1234")
+                .phoneNumber("01012341234")
+                .build();
+
     }
 
     @Test
