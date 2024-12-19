@@ -10,11 +10,14 @@ import lombok.*;
 
 @Getter
 @Entity(name="products")
-@AttributeOverride(name = "id", column = @Column(name = "productId"))
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product extends BaseEntity{
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @NotNull
     private String name;
@@ -29,7 +32,6 @@ public class Product extends BaseEntity{
     private Integer stockQuantity;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
     @Convert(converter = CategoryConverter.class)
     private Category category;
 

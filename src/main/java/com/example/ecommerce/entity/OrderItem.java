@@ -10,8 +10,11 @@ import lombok.*;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AttributeOverride(name="id", column = @Column(name="orderItemId"))
 public class OrderItem extends BaseEntity{
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @NotNull
     @ManyToOne
