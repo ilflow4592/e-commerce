@@ -20,7 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,43 +34,49 @@ public class ProductServiceTest {
     @InjectMocks
     private ProductServiceImpl productService;
     private Product product;
-    private ProductDto productDto;
+
 
     @BeforeEach
     void setUp() {
-        product = new Product("패딩 점퍼", "방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.", 50000, 10 , Category.OUTER, Size.L);
-        product.setId(1L);
-
-        productDto = new ProductDto(1L, "패딩 점퍼", "방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.", 50000, 100, Category.OUTER, Size.L);
+        product = Product.builder()
+                .id(1L)
+                .name("치노 팬츠")
+                .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
+                .unitPrice(50000)
+                .stockQuantity(100)
+                .category(Category.PANTS)
+                .size(Size.M)
+                .build();
     }
 
     @Test
     @DisplayName("상품을 생성할 수 있다.")
     void createProduct() {
         // given
-        CreateProductDto createProductDto = new CreateProductDto(
-                "패딩 점퍼",
-                "방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.",
-                50000,
-                100,
-                Category.OUTER,
-                Size.L
-        );
+        CreateProductDto createProductDto = CreateProductDto.builder()
+                .name("패딩 점퍼")
+                .description("방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.")
+                .unitPrice(50000)
+                .stockQuantity(100)
+                .category(Category.OUTER)
+                .size(Size.L)
+                .build();
+
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
         // when
         Long productId = productService.createProduct(createProductDto);
 
         // then
-        assertEquals(1L, productId);
+        assertEquals(product.getId(), productId);
         verify(productRepository, times(1)).save(any(Product.class));
     }
 
     @Test
-    @DisplayName("존재하는 모든 상품들을 조회할 수 있다.")
+    @DisplayName("존재하는 모든 상품을 조회할 수 있다.")
     void getAllProducts() {
         // given
-        Page<Product> productsPage = new PageImpl<>(Arrays.asList(product));
+        Page<Product> productsPage = new PageImpl<>(Collections.singletonList(product));
         Pageable pageable = PageRequest.of(0, 10);
         when(productRepository.findAll(pageable)).thenReturn(productsPage);
 
@@ -87,7 +93,7 @@ public class ProductServiceTest {
     @DisplayName("단일 상품을 조회할 수 있다.")
     void getProduct() {
         // given
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         // when
         ProductDto result = productService.getProduct(1L);
@@ -103,7 +109,7 @@ public class ProductServiceTest {
     @DisplayName("찾는 상품이 존재하지 않을 시, ProductNotFoundException 예외를 던진다.")
     void getProduct_NotFound() {
         // given
-        when(productRepository.findById(1L)).thenReturn(Optional.empty());
+        when(productRepository.findById(product.getId())).thenReturn(Optional.empty());
 
         // when, then
         assertThrows(ProductNotFoundException.class, () -> productService.getProduct(1L));
@@ -114,7 +120,16 @@ public class ProductServiceTest {
     @DisplayName("상품을 갱신할 수 있다.")
     void updateProduct() {
         // given
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        ProductDto productDto = ProductDto.builder()
+                .name("패딩 점퍼")
+                .description("방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.")
+                .unitPrice(50000)
+                .stockQuantity(100)
+                .category(Category.OUTER)
+                .size(Size.L)
+                .build();
+
+        when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         // when
         ProductDto result = productService.updateProduct(1L, productDto);
@@ -129,10 +144,10 @@ public class ProductServiceTest {
     @DisplayName("상품을 제거할 수 있다.")
     void deleteProduct() {
         // given
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         // when
-        productService.deleteProduct(1L);
+        productService.deleteProduct(product.getId());
 
         // then
         verify(productRepository, times(1)).findById(1L);
