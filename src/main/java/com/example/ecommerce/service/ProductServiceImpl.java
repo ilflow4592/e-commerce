@@ -34,13 +34,11 @@ public class ProductServiceImpl implements ProductService{
         Page<Product> pageableProducts = productRepository.findAll(pageable);
 
         return PageableDto.toDto(pageableProducts.map(Product::toDto));
-
     }
 
     @Override
     public ProductDto getProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(ProductException.NOTFOUND.getStatus(), ProductException.NOTFOUND.getMessage()));
+        Product product = findProductById(id);
 
         return Product.toDto(product);
     }
@@ -48,10 +46,8 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     @Override
     public ProductDto updateProduct(Long id, ProductDto productDto) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(ProductException.NOTFOUND.getStatus(), ProductException.NOTFOUND.getMessage()));
+        Product product = findProductById(id);
 
-        System.out.println("dto"+productDto);
         product.update(productDto);
 
         return Product.toDto(product);
@@ -60,9 +56,13 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     @Override
     public void deleteProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(ProductException.NOTFOUND.getStatus(), ProductException.NOTFOUND.getMessage()));
+        Product product = findProductById(id);
 
         productRepository.delete(product);
+    }
+
+    private Product findProductById(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(ProductException.NOTFOUND.getStatus(), ProductException.NOTFOUND.getMessage()));
     }
 }
