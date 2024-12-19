@@ -15,11 +15,14 @@ import java.util.List;
 
 @Getter
 @Entity(name = "orders")
-@AttributeOverride(name = "id", column = @Column(name = "orderId"))
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends BaseEntity{
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @OneToOne
     @JoinColumn(name = "userId")
