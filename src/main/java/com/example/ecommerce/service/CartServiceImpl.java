@@ -5,8 +5,8 @@ import com.example.ecommerce.common.exception.product.ProductNotFoundException;
 import com.example.ecommerce.common.exception.product.ProductOutOfStockException;
 import com.example.ecommerce.common.exception.user.UserException;
 import com.example.ecommerce.common.exception.user.UserNotFoundException;
-import com.example.ecommerce.dto.cart.AddToCartDto;
 import com.example.ecommerce.dto.cart.RemoveFromCartDto;
+import com.example.ecommerce.dto.cart.UpdateCartProductDto;
 import com.example.ecommerce.entity.Cart;
 import com.example.ecommerce.entity.CartHasProduct;
 import com.example.ecommerce.entity.Product;
@@ -33,7 +33,7 @@ public class CartServiceImpl implements CartService{
 
     @Override
     @Transactional
-    public void addProduct(AddToCartDto dto) {
+    public void updateCartProductQuantity(UpdateCartProductDto dto) {
         Product product = findProductById(dto.productId());
         validateStockAvailability(product, dto.quantity());
         User user = findUserById(dto.userId());
@@ -47,27 +47,9 @@ public class CartServiceImpl implements CartService{
     @Override
     @Transactional
     public void removeProduct(RemoveFromCartDto dto) {
-        Product product = findProductById(dto.productId());
         User user = findUserById(dto.userId());
         Cart cart = findOrCreateCart(user);
-        List<CartHasProduct> cartHasProducts = cart.getCartHasProducts();
-
-        int index = getProductIndex(cartHasProducts, product.getId());
-
-        if (index != -1) {
-            CartHasProduct cartHasProduct = cartHasProducts.get(index);
-
-            // 수량 감소 및 업데이트
-            cartHasProduct.removeProductUpdate(product.getUnitPrice());
-
-            // 수량이 0이면 리스트에서 제거
-            if (cartHasProduct.getQuantity() <= 0) {
-                cartHasProducts.remove(index);
-            }
-        }
-
-        cartRepository.save(cart);
-
+        cart.removeProduct(dto.productId());
     }
 
     private Product findProductById(Long productId) {
@@ -103,13 +85,13 @@ public class CartServiceImpl implements CartService{
                         .build());
     }
 
-    private void updateCartWithProduct(Cart cart, Product product, int quantity) {
+    private void updateCartWithProduct(Cart cart, Product product, Integer quantity) {
         List<CartHasProduct> cartHasProducts = cart.getCartHasProducts();
 
         int index = getProductIndex(cartHasProducts, product.getId());
 
         if (index != -1) {
-            cartHasProducts.get(index).addProductUpdate(quantity, product.getUnitPrice());
+            cartHasProducts.get(index).updateQuantityWithTotalPrice(quantity, product.getUnitPrice());
         } else {
             cart.addProduct(product, quantity);
         }
@@ -122,6 +104,6 @@ public class CartServiceImpl implements CartService{
                     return product != null && product.getId().equals(productId);
                 })
                 .findFirst()
-                .orElse(-1);
+                .orElse(-1); // 찾는 상품이 없을 경우 -1을 반환
     }
 }

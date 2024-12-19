@@ -1,6 +1,9 @@
 package com.example.ecommerce.dto.cart;
 
-public record AddToCartDto(
+import lombok.Builder;
+
+@Builder
+public record UpdateCartProductDto(
         Long userId,
         Long productId,
         Integer quantity

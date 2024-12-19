@@ -1,8 +1,6 @@
 package com.example.ecommerce.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -12,6 +10,10 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class CartHasProduct extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long cartHasProductId;
 
     @ManyToOne
     @JoinColumn(name = "cart_id")
@@ -28,13 +30,9 @@ public class CartHasProduct extends BaseEntity {
     @NotNull
     private Integer totalPrice;
 
-    public void addProductUpdate(Integer quantity, Integer unitPrice){
-        this.quantity += quantity;
-        this.totalPrice += quantity*unitPrice;
+    public void updateQuantityWithTotalPrice(Integer quantity, Integer unitPrice){
+        this.quantity = quantity;
+        this.totalPrice = quantity * unitPrice;
     }
 
-    public void removeProductUpdate(Integer unitPrice){
-        this.quantity -= 1;
-        this.totalPrice -= unitPrice;
-    }
 }
