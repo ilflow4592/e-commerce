@@ -13,6 +13,10 @@ import java.util.List;
 @Getter
 public class Cart extends BaseEntity{
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @NotNull
     @OneToOne
     @JoinColumn(name = "user_id")
@@ -27,8 +31,14 @@ public class Cart extends BaseEntity{
                 .cart(this)
                 .product(product)
                 .quantity(quantity)
-                .totalPrice(product.getUnitPrice()*quantity)
+                .totalPrice(product.getUnitPrice() * quantity)
                 .build()
+        );
+    }
+
+    public void removeProduct(Long productId){
+        this.cartHasProducts.removeIf(cartHasProduct ->
+                cartHasProduct.getProduct().getId().equals(productId)
         );
     }
 
