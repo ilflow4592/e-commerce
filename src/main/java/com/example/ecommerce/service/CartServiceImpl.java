@@ -47,6 +47,7 @@ public class CartServiceImpl implements CartService{
     @Override
     @Transactional
     public void removeProduct(RemoveFromCartDto dto) {
+        findProductById(dto.productId());
         User user = findUserById(dto.userId());
         Cart cart = findOrCreateCart(user);
         cart.removeProduct(dto.productId());

@@ -5,6 +5,7 @@ import com.example.ecommerce.common.enums.product.Size;
 import com.example.ecommerce.common.exception.product.ProductNotFoundException;
 import com.example.ecommerce.common.exception.product.ProductOutOfStockException;
 import com.example.ecommerce.common.exception.user.UserNotFoundException;
+import com.example.ecommerce.dto.cart.RemoveFromCartDto;
 import com.example.ecommerce.dto.cart.UpdateCartProductDto;
 import com.example.ecommerce.entity.Cart;
 import com.example.ecommerce.entity.CartHasProduct;
@@ -177,6 +178,39 @@ public class CartServiceTest {
         CartHasProduct cartHasProduct = cart.getCartHasProducts().get(0);
         assertEquals(product, cartHasProduct.getProduct());
         assertEquals(1, cartHasProduct.getQuantity());
+    }
+
+    @Test
+    @DisplayName("장바구니에서 상품을 제거할 수 있다.")
+    public void removeProductFromCart(){
+        // given
+        UpdateCartProductDto updateCartProductDto = UpdateCartProductDto.builder()
+                .userId(1L)
+                .productId(1L)
+                .quantity(1)
+                .build();
+
+        //제거할 상품
+        RemoveFromCartDto removeFromCartDto = RemoveFromCartDto.builder()
+                .userId(1L)
+                .productId(1L)
+                .build();
+
+        when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
+
+        // 장바구니에 상품 추가 (초기 상태 설정)
+        cart.addProduct(product, updateCartProductDto.quantity());
+
+        // when
+        cartService.removeProduct(removeFromCartDto);
+
+        // then
+        assertTrue(cart.getCartHasProducts().isEmpty(), "장바구니에 더 이상 상품이 없어야 한다.");
+        verify(cartRepository, times(1)).findByUser(user);
+        verify(productRepository, times(1)).findById(product.getId());
+        verify(userRepository, times(1)).findById(user.getId());
     }
 }
 
