@@ -3,6 +3,7 @@ package com.example.ecommerce.controller;
 import com.example.ecommerce.dto.product.CreateProductDto;
 import com.example.ecommerce.dto.PageableDto;
 import com.example.ecommerce.dto.product.ProductDto;
+import com.example.ecommerce.repository.custom.ProductRepositoryCustom;
 import com.example.ecommerce.service.ProductService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,11 +18,21 @@ import org.springframework.data.domain.Pageable;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductRepositoryCustom productRepositoryCustom;
 
     @PostMapping
     public ResponseEntity<Long> createProduct(@RequestBody CreateProductDto productDto){
         Long productId = productService.createProduct(productDto);
         return new ResponseEntity<>(productId, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<PageableDto<ProductDto>> searchProducts(
+            @RequestParam(required = false) String keyword,
+            Pageable pageable
+    ){
+        PageableDto<ProductDto> productDtoPageableDto = productRepositoryCustom.searchProducts(keyword, pageable);
+        return new ResponseEntity<>(productDtoPageableDto,HttpStatus.OK);
     }
 
     @GetMapping
