@@ -1,8 +1,11 @@
 package com.example.ecommerce.controller;
 
+import com.example.ecommerce.common.enums.product.Category;
+import com.example.ecommerce.common.enums.product.Size;
 import com.example.ecommerce.dto.product.CreateProductDto;
 import com.example.ecommerce.dto.PageableDto;
 import com.example.ecommerce.dto.product.ProductDto;
+import com.example.ecommerce.dto.product.ProductFilterDto;
 import com.example.ecommerce.repository.custom.ProductRepositoryCustom;
 import com.example.ecommerce.service.ProductService;
 import lombok.AllArgsConstructor;
@@ -29,9 +32,11 @@ public class ProductController {
     @GetMapping("/search")
     public ResponseEntity<PageableDto<ProductDto>> searchProducts(
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Category category,
+            @RequestParam(required = false) Size productSize,
             Pageable pageable
     ){
-        PageableDto<ProductDto> productDtoPageableDto = productRepositoryCustom.searchProducts(keyword, pageable);
+        PageableDto<ProductDto> productDtoPageableDto = productRepositoryCustom.searchProducts(keyword, category, productSize, pageable);
         return new ResponseEntity<>(productDtoPageableDto,HttpStatus.OK);
     }
 
