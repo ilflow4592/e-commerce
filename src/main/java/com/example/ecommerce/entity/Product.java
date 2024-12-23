@@ -37,6 +37,7 @@ public class Product extends BaseEntity{
 
     @NotNull
     @Enumerated(EnumType.STRING)
+    @Column(name = "productSize")
     private Size size;
 
     public static ProductDto toDto(Product product){
@@ -46,6 +47,8 @@ public class Product extends BaseEntity{
                 .description(product.getDescription())
                 .unitPrice(product.getUnitPrice())
                 .stockQuantity(product.getStockQuantity())
+                .category(product.getCategory())
+                .size(product.getSize())
                 .build();
     }
 
@@ -54,6 +57,8 @@ public class Product extends BaseEntity{
         if (dto.description() != null) this.description = dto.description();
         if (dto.unitPrice() != null) this.unitPrice = dto.unitPrice();
         if (dto.stockQuantity() != null) this.stockQuantity = dto.stockQuantity();
+        if (dto.category() != null) this.category = dto.category();
+        if (dto.size() != null) this.size = dto.size();
     }
 
     public void updateStockQuantity(Integer stockQuantity){
