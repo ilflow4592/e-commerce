@@ -5,7 +5,6 @@ import com.example.ecommerce.common.enums.product.Size;
 import com.example.ecommerce.dto.product.CreateProductDto;
 import com.example.ecommerce.dto.PageableDto;
 import com.example.ecommerce.dto.product.ProductDto;
-import com.example.ecommerce.dto.product.ProductFilterDto;
 import com.example.ecommerce.repository.custom.ProductRepositoryCustom;
 import com.example.ecommerce.service.ProductService;
 import lombok.AllArgsConstructor;
