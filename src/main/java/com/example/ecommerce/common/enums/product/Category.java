@@ -1,9 +1,8 @@
 package com.example.ecommerce.common.enums.product;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@Getter
 @AllArgsConstructor
 public enum Category {
     PANTS("바지"),
@@ -13,5 +12,10 @@ public enum Category {
     ACCESSORY("액세서리");
 
     private final String category;
+
+    @JsonValue
+    public String getCategory() {
+        return category;
+    }
 
 }
