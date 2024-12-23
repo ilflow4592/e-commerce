@@ -1,9 +1,10 @@
 package com.example.ecommerce.repository.custom;
 
+import com.example.ecommerce.common.enums.product.Category;
+import com.example.ecommerce.common.enums.product.Size;
 import com.example.ecommerce.dto.PageableDto;
 import com.example.ecommerce.dto.product.ProductDto;
 import com.example.ecommerce.entity.Product;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
@@ -21,30 +22,59 @@ import java.util.List;
 public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     private final EntityManager entityManager;
 
+    /**
+     * 검색 시, Full-Text 인덱스 활용을 위한 네이티브 쿼리 작성
+     */
     @Override
-    public PageableDto<ProductDto> searchProducts(String keyword, Pageable pageable) {
-        // 네이티브 쿼리를 사용한 Full-Text 검색
-        String nativeQuery = """
-            SELECT *
-            FROM products
-            WHERE MATCH(name) AGAINST (:keyword IN BOOLEAN MODE)
-            LIMIT :offset, :size
-        """;
+    public PageableDto<ProductDto> searchProducts(String keyword, Category category, Size productSize, Pageable pageable) {
+        // 기본 네이티브 쿼리와 COUNT 쿼리 공통 부분 생성
+        String baseQuery = "MATCH(name) AGAINST (:keyword IN BOOLEAN MODE)";
 
-        Query query = entityManager.createNativeQuery(nativeQuery, Product.class)
+        // 조건 추가
+        StringBuilder filterConditions = new StringBuilder();
+
+        if (category != null) {
+            filterConditions.append(" AND category = :category");
+        }
+        if (productSize != null) {
+            filterConditions.append(" AND product_size = :product_size");
+        }
+
+        // 데이터 조회 쿼리
+        String dataQuery = String.format("SELECT * FROM products WHERE %s%s LIMIT :offset, :size", baseQuery, filterConditions);
+
+        Query query = entityManager.createNativeQuery(dataQuery, Product.class)
                 .setParameter("keyword", keyword)
                 .setParameter("offset", pageable.getOffset())
                 .setParameter("size", pageable.getPageSize());
 
-        List<Product> products = query.getResultList();
+        // COUNT 쿼리
+        String countQuery = String.format("SELECT COUNT(*) FROM products WHERE %s%s", baseQuery, filterConditions);
 
+        Query countResultQuery = entityManager.createNativeQuery(countQuery)
+                .setParameter("keyword", keyword);
+
+        // 공통 파라미터 설정
+        if (category != null) {
+            query.setParameter("category", category.getCategory());
+            countResultQuery.setParameter("category", category.getCategory());
+        }
+        if (productSize != null) {
+            query.setParameter("product_size", productSize.toString());
+            countResultQuery.setParameter("product_size", productSize.toString());
+        }
+
+        // 결과 조회 및 총 데이터 수 계산
+        List<Product> products = query.getResultList();
+        long totalElements = ((Number) countResultQuery.getSingleResult()).longValue();
+
+        // 페이징 처리
         Page<Product> pageableProducts = new PageImpl<>(
-                products,  // 현재 페이지의 데이터
-                pageable,   // 페이지 요청 정보
-                products.size()    // 전체 데이터 수
+                products,
+                pageable,
+                totalElements
         );
 
         return PageableDto.toDto(pageableProducts.map(Product::toDto));
-
     }
 }
