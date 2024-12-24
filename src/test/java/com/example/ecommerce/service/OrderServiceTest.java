@@ -36,6 +36,7 @@ import org.springframework.data.domain.Pageable;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -72,21 +73,36 @@ public class OrderServiceTest {
     @BeforeEach
     void setUp() {
         //userId가 1L이라고 가정한 주문한 상품 2개의 총 가격은 = 100,000 (개당 50,000)
-        createOrderDto = new CreateOrderDto(1L, 100000, Map.of(1L, 2));
+        createOrderDto = CreateOrderDto.builder()
+                .userId(1L)
+                .totalPrice(100000)
+                .productsMap(Map.of(1L,2))
+                .build();
 
-        user = new User("ILYA", "test123@gmail.com","1234","01012341234");
-        user.setId(1L);
+        user = User.builder()
+                .id(1L)
+                .name("ILYA")
+                .email("test@naver.com")
+                .password("1234")
+                .phoneNumber("01012341234")
+                .build();
 
-        product = new Product("패딩 점퍼", "방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.", 50000, 10, Category.OUTER, Size.L);
-        product.setId(1L);
+        product = Product.builder()
+                .id(1L)
+                .name("치노 팬츠")
+                .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
+                .unitPrice(50000)
+                .stockQuantity(100)
+                .category(Category.PANTS)
+                .size(Size.M)
+                .build();
 
-//        //50,000*2=100,000
         order = Order.builder()
+                .id(1L)
                 .user(user)
                 .totalPrice(100000)
                 .orderItems(new ArrayList<>())
                 .build();
-        order.setId(1L);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
         LocalDateTime paidAt = LocalDateTime.parse("2024-11-01 12:59:16.773693", formatter);
@@ -126,7 +142,9 @@ public class OrderServiceTest {
         // save 호출 시 ID가 설정된 order 반환
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> {
             Order savedOrder = invocation.getArgument(0);
-            savedOrder.setId(1L);  // 테스트에서 사용할 ID 설정
+            Field idField = Order.class.getDeclaredField("id");
+            idField.setAccessible(true); // private 필드 접근 허용
+            idField.set(savedOrder, 1L); // ID 설정
             return savedOrder;
         });
 
@@ -223,10 +241,7 @@ public class OrderServiceTest {
 
         // then
         assertNotNull(result);
-        assertEquals(order.getUser(), result.userDto());
-        assertEquals(order.getTotalPrice(), result.totalPrice());
-        assertEquals(order.getOrderItems(), result.orderItemsDto());
-        assertEquals(order.getOrderStatus(), result.orderStatus());
+        assertEquals(result, Order.toDto(order));;
         verify(orderRepository, times(1)).findById(1L);
     }
 
