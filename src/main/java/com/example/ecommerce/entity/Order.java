@@ -9,7 +9,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
+import org.springframework.data.annotation.CreatedDate;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +20,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Order extends BaseEntity{
+public class Order{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,6 +42,10 @@ public class Order extends BaseEntity{
     @NotNull
     @Enumerated(value = EnumType.STRING)
     private OrderStatus orderStatus = OrderStatus.PENDING;
+
+    @NotNull
+    @CreatedDate
+    private LocalDateTime createdAt;
 
     public void fromCurrentOrderStatusTo(OrderStatus orderStatus){
         this.orderStatus = orderStatus;
