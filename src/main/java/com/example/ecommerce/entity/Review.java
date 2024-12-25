@@ -1,5 +1,6 @@
 package com.example.ecommerce.entity;
 
+import com.example.ecommerce.dto.review.ReviewDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -30,4 +31,14 @@ public class Review extends BaseEntity{
     private Float rating;
 
     private String comment;
+
+    public static ReviewDto toDto(Review review){
+        return ReviewDto.builder()
+                .id(review.getId())
+                .userId(review.getUser().getId())
+                .productId(review.getProduct().getId())
+                .rating(review.getRating())
+                .comment(review.getComment())
+                .build();
+    }
 }
