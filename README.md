@@ -9,7 +9,8 @@
 - 테스트 : JUnit5, Mockito
 
 ## ERD
-![Screen Shot 2024-12-24 at 10 12 38 PM](https://github.com/user-attachments/assets/f6a9c26b-7a60-4153-a9aa-389b1a78a5c3)
+<img width="736" alt="Screen Shot 2024-12-25 at 3 44 10 PM" src="https://github.com/user-attachments/assets/0e76809d-459e-4643-a8b6-3712f86a4c73" />
+
 
 ## 작업 리스트
 1. 상품 장바구니 담기 및 제거
