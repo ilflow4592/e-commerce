@@ -7,6 +7,7 @@ import com.example.ecommerce.common.exception.order_item.OrderItemNotFoundExcept
 import com.example.ecommerce.common.exception.port_one.PortOneNotFoundPaymentException;
 import com.example.ecommerce.common.exception.product.ProductNotFoundException;
 import com.example.ecommerce.common.exception.product.ProductOutOfStockException;
+import com.example.ecommerce.common.exception.review.ReviewNotFoundException;
 import com.example.ecommerce.common.exception.user.UserEmailDuplicateException;
 import com.example.ecommerce.common.exception.user.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -99,6 +100,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PortOneNotFoundPaymentException.class)
     public ResponseEntity<Map<String, Object>> handlePortOneNotFoundPaymentException(PortOneNotFoundPaymentException ex) {
         log.warn("PortOneNotFoundPaymentException 발생: {}", ex.getMessage(), ex);
+
+        return errorResponse(ex.getStatus(), ex.getMessage());
+    }
+
+    /**
+     * Review Exception
+     */
+    @ExceptionHandler(ReviewNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleReviewNotFoundException(ReviewNotFoundException ex) {
+        log.warn("ReviewNotFoundException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
     }
