@@ -32,7 +32,6 @@ public class Product extends BaseEntity{
     private Integer stockQuantity;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
     @Convert(converter = CategoryConverter.class)
     private Category category;
 
