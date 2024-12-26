@@ -72,5 +72,7 @@ public class Product extends BaseEntity{
         this.stockQuantity = stockQuantity;
     }
 
+    public void updateAvgRating(float avgRating) {this.avgRating = avgRating;}
+
 
 }
