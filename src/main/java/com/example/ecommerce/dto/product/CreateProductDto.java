@@ -12,7 +12,8 @@ public record CreateProductDto(
         Integer unitPrice,
         Integer stockQuantity,
         Category category,
-        Size size
+        Size size,
+        float avgRating
 ) {
 
     public static Product toEntity(CreateProductDto dto){
@@ -23,6 +24,7 @@ public record CreateProductDto(
                 .stockQuantity(dto.stockQuantity)
                 .category(dto.category)
                 .size(dto.size)
+                .avgRating(0) //초기값
                 .build();
     }
 
