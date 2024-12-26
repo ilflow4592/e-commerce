@@ -7,6 +7,7 @@ import com.example.ecommerce.common.exception.order_item.OrderItemNotFoundExcept
 import com.example.ecommerce.common.exception.port_one.PortOneNotFoundPaymentException;
 import com.example.ecommerce.common.exception.product.ProductNotFoundException;
 import com.example.ecommerce.common.exception.product.ProductOutOfStockException;
+import com.example.ecommerce.common.exception.review.ReviewAlreadyExistsException;
 import com.example.ecommerce.common.exception.review.ReviewNotFoundException;
 import com.example.ecommerce.common.exception.user.UserEmailDuplicateException;
 import com.example.ecommerce.common.exception.user.UserNotFoundException;
@@ -110,6 +111,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ReviewNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleReviewNotFoundException(ReviewNotFoundException ex) {
         log.warn("ReviewNotFoundException 발생: {}", ex.getMessage(), ex);
+
+        return errorResponse(ex.getStatus(), ex.getMessage());
+    }
+
+    @ExceptionHandler(ReviewAlreadyExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleReviewAlreadyExistsException(ReviewAlreadyExistsException ex) {
+        log.warn("ReviewAlreadyExistsException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
     }
