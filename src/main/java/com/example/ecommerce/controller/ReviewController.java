@@ -22,9 +22,13 @@ public class ReviewController {
         return new ResponseEntity<>(reviewId, HttpStatus.CREATED);
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<ReviewDto> getReview(@PathVariable Long id){
-        ReviewDto reviewDto = reviewService.getReview(id);
+    //특정 상품의 특정 사용자가 쓴 리뷰
+    @GetMapping("{productId}/{userId}")
+    public ResponseEntity<ReviewDto> getReview(
+            @PathVariable Long productId,
+            @PathVariable Long userId
+            ){
+        ReviewDto reviewDto = reviewService.getReview(productId, userId);
         return new ResponseEntity<>(reviewDto, HttpStatus.OK);
     }
 }
