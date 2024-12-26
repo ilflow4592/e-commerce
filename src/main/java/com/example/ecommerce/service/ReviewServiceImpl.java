@@ -2,6 +2,7 @@ package com.example.ecommerce.service;
 
 import com.example.ecommerce.common.exception.product.ProductException;
 import com.example.ecommerce.common.exception.product.ProductNotFoundException;
+import com.example.ecommerce.common.exception.review.ReviewAlreadyExistsException;
 import com.example.ecommerce.common.exception.review.ReviewException;
 import com.example.ecommerce.common.exception.user.UserException;
 import com.example.ecommerce.common.exception.user.UserNotFoundException;
@@ -46,6 +47,16 @@ public class ReviewServiceImpl implements ReviewService{
                         ProductException.NOTFOUND.getMessage()
                 ));
 
+
+        // 사용자가 이미 리뷰를 작성했는지 확인 - 특정 상품에 대한 리뷰는 사용자당 한번만 작성 가능
+        reviewRepository.findByUserIdAndProductId(user.getId(), product.getId())
+                .ifPresent(review -> {
+                    throw new ReviewAlreadyExistsException(
+                            ReviewException.ALREADY_EXISTS.getStatus(),
+                            ReviewException.ALREADY_EXISTS.getMessage()
+                    );
+                });
+
         List<Review> matchedReviewsByProductId = reviewRepository.findAllByProductId(product.getId());
 
         if (!matchedReviewsByProductId.isEmpty()) {
@@ -71,13 +82,25 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     @Override
-    public ReviewDto getReview(Long reviewId) {
-        Review review = reviewRepository.findById(reviewId)
+    public ReviewDto getReview(Long productId, Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(
+                        UserException.NOTFOUND.getStatus(),
+                        UserException.NOTFOUND.getMessage()
+                ));
+
+        productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(
+                        ProductException.NOTFOUND.getStatus(),
+                        ProductException.NOTFOUND.getMessage()
+                ));
+
+        return reviewRepository.findByUserIdAndProductId(userId, productId)
+                .map(ReviewDto::toDto)
                 .orElseThrow(() -> new ReviewNotFoundException(
                         ReviewException.NOTFOUND.getStatus(),
                         ReviewException.NOTFOUND.getMessage()
                 ));
 
-        return Review.toDto(review);
     }
 }

@@ -6,5 +6,5 @@ import com.example.ecommerce.dto.review.ReviewDto;
 public interface ReviewService {
 
     Long createReview(CreateReviewDto createReviewDto);
-    ReviewDto getReview(Long reviewId);
+    ReviewDto getReview(Long productId, Long userId);
 }
