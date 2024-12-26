@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Entity(name="products")
 @Builder
@@ -39,6 +41,11 @@ public class Product extends BaseEntity{
     @Enumerated(EnumType.STRING)
     @Column(name = "productSize")
     private Size size;
+
+    @OneToMany(mappedBy = "product")
+    private List<Review> reviews;
+
+    private float avgRating;
 
     public static ProductDto toDto(Product product){
         return ProductDto.builder()
