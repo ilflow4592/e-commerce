@@ -1,11 +1,13 @@
 package com.example.ecommerce.controller;
 
+import com.example.ecommerce.dto.PageableDto;
 import com.example.ecommerce.dto.review.CreateReviewDto;
 import com.example.ecommerce.dto.review.ReviewDto;
 import com.example.ecommerce.dto.review.UpdateReviewDto;
 import com.example.ecommerce.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,7 +47,15 @@ public class ReviewController {
 
     }
 
-    //특정 상품에 대한 모든 리뷰
+    //특정 상품에 대한 모든 리뷰 - 페이지네이션 처리
+    @GetMapping("{productId}")
+    public ResponseEntity<PageableDto<ReviewDto>> getReviewsByProductId(
+            @PathVariable Long productId,
+            Pageable pageable
+    ){
+        PageableDto<ReviewDto> pageableDto = reviewService.getReviewsByProductId(productId, pageable);
+        return new ResponseEntity<>(pageableDto, HttpStatus.OK);
+    }
 
     //모든 리뷰 - 페이지네이션 처리
 }
