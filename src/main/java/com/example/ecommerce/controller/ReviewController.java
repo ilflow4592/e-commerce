@@ -58,4 +58,9 @@ public class ReviewController {
     }
 
     //모든 리뷰 - 페이지네이션 처리
+    @GetMapping
+    public ResponseEntity<PageableDto<ReviewDto>> getAllReviews(Pageable pageable){
+        PageableDto<ReviewDto> pageableDto = reviewService.getAllReviews(pageable);
+        return new ResponseEntity<>(pageableDto, HttpStatus.OK);
+    }
 }
