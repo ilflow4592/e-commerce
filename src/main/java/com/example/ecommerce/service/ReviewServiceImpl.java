@@ -9,12 +9,14 @@ import com.example.ecommerce.common.exception.user.UserNotFoundException;
 import com.example.ecommerce.common.exception.review.ReviewNotFoundException;
 import com.example.ecommerce.dto.review.CreateReviewDto;
 import com.example.ecommerce.dto.review.ReviewDto;
+import com.example.ecommerce.dto.review.UpdateReviewDto;
 import com.example.ecommerce.entity.Product;
 import com.example.ecommerce.entity.Review;
 import com.example.ecommerce.entity.User;
 import com.example.ecommerce.repository.ProductRepository;
 import com.example.ecommerce.repository.ReviewRepository;
 import com.example.ecommerce.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -57,12 +59,20 @@ public class ReviewServiceImpl implements ReviewService{
                     );
                 });
 
+        calculateProductReviewRating(dto.rating(), product, user);
+
+        Review review = CreateReviewDto.toEntity(dto, user, product);
+
+        return reviewRepository.save(review).getId();
+    }
+
+    private void calculateProductReviewRating(float rating, Product product, User user) {
         List<Review> matchedReviewsByProductId = reviewRepository.findAllByProductId(product.getId());
 
         if (!matchedReviewsByProductId.isEmpty()) {
             double totalRating = matchedReviewsByProductId.stream()
                     .mapToDouble(Review::getRating)
-                    .sum() + dto.rating();
+                    .sum() + rating;
 
             float newAverageRating = (float) (totalRating / (matchedReviewsByProductId.size() + 1)); // 평균 계산
 
@@ -73,12 +83,8 @@ public class ReviewServiceImpl implements ReviewService{
         } else {
             log.info("id가 " + user.getId() + " 인 유저가 " + product.getName() + " 상품의 첫 리뷰를 작성하셨습니다.");
 
-            product.updateAvgRating(dto.rating());
+            product.updateAvgRating(rating);
         }
-
-        Review review = CreateReviewDto.toEntity(dto, user, product);
-
-        return reviewRepository.save(review).getId();
     }
 
     @Override
@@ -102,5 +108,35 @@ public class ReviewServiceImpl implements ReviewService{
                         ReviewException.NOTFOUND.getMessage()
                 ));
 
+    }
+
+    @Override
+    @Transactional
+    public ReviewDto updateReview(Long productId, Long userId, UpdateReviewDto updateReviewDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(
+                        UserException.NOTFOUND.getStatus(),
+                        UserException.NOTFOUND.getMessage()
+                ));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(
+                        ProductException.NOTFOUND.getStatus(),
+                        ProductException.NOTFOUND.getMessage()
+                ));
+
+        Review review = reviewRepository.findByUserIdAndProductId(userId, productId)
+                .orElseThrow(() -> new ReviewNotFoundException(
+                        ReviewException.NOTFOUND.getStatus(),
+                        ReviewException.NOTFOUND.getMessage()
+                ));
+
+        if(updateReviewDto.rating() != review.getRating()){
+            calculateProductReviewRating(updateReviewDto.rating(), product, user);
+        }
+
+        review.update(updateReviewDto.rating(), updateReviewDto.comment());
+
+        return Review.toDto(review);
     }
 }
