@@ -12,4 +12,5 @@ public interface ReviewService {
     ReviewDto getReview(Long productId, Long userId);
     ReviewDto updateReview(Long productId, Long userId, UpdateReviewDto updateReviewDto);
     PageableDto<ReviewDto> getReviewsByProductId(Long productId, Pageable pageable);
+    PageableDto<ReviewDto> getAllReviews(Pageable pageable);
 }

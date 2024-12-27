@@ -154,4 +154,11 @@ public class ReviewServiceImpl implements ReviewService{
 
         return PageableDto.toDto(pageableReviews.map(Review::toDto));
     }
+
+    @Override
+    public PageableDto<ReviewDto> getAllReviews(Pageable pageable) {
+        Page<Review> pageableReviews = reviewRepository.findAll(pageable);
+
+        return PageableDto.toDto(pageableReviews.map(Review::toDto));
+    }
 }
