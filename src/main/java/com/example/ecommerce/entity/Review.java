@@ -41,4 +41,9 @@ public class Review extends BaseEntity{
                 .comment(review.getComment())
                 .build();
     }
+
+    public void update(Float rating, String comment){
+        if(rating != null){this.rating = rating;}
+        if (comment != null){this.comment = comment;}
+    }
 }
