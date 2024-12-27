@@ -7,6 +7,7 @@ import com.example.ecommerce.common.exception.review.ReviewException;
 import com.example.ecommerce.common.exception.user.UserException;
 import com.example.ecommerce.common.exception.user.UserNotFoundException;
 import com.example.ecommerce.common.exception.review.ReviewNotFoundException;
+import com.example.ecommerce.dto.PageableDto;
 import com.example.ecommerce.dto.review.CreateReviewDto;
 import com.example.ecommerce.dto.review.ReviewDto;
 import com.example.ecommerce.dto.review.UpdateReviewDto;
@@ -16,9 +17,10 @@ import com.example.ecommerce.entity.User;
 import com.example.ecommerce.repository.ProductRepository;
 import com.example.ecommerce.repository.ReviewRepository;
 import com.example.ecommerce.repository.UserRepository;
-import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,5 +140,18 @@ public class ReviewServiceImpl implements ReviewService{
         review.update(updateReviewDto.rating(), updateReviewDto.comment());
 
         return Review.toDto(review);
+    }
+
+    @Override
+    public PageableDto<ReviewDto> getReviewsByProductId(Long productId, Pageable pageable) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(
+                        ProductException.NOTFOUND.getStatus(),
+                        ProductException.NOTFOUND.getMessage()
+                ));
+
+        Page<Review> pageableReviews = reviewRepository.findAllByProductId(product.getId(), pageable);
+
+        return PageableDto.toDto(pageableReviews.map(Review::toDto));
     }
 }
