@@ -68,7 +68,7 @@ public class ReviewServiceImpl implements ReviewService{
         return reviewRepository.save(review).getId();
     }
 
-    private void calculateProductReviewRating(float rating, Product product, User user) {
+    protected void calculateProductReviewRating(float rating, Product product, User user) {
         List<Review> matchedReviewsByProductId = reviewRepository.findAllByProductId(product.getId());
 
         if (!matchedReviewsByProductId.isEmpty()) {

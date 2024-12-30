@@ -8,8 +8,10 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
 
+@Builder
 public record CreateReviewDto(
     Long userId,
     Long productId,
