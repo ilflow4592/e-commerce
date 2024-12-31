@@ -17,7 +17,7 @@ public record PageableDto<T>(
         return PageableDto.<T>builder()
                 .data(page.getContent())
                 .last(page.isLast())
-                .page(page.getTotalPages())
+                .page(page.getNumber() + 1)
                 .size(page.getSize())
                 .build();
     }
