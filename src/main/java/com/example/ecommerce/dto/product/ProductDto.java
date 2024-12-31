@@ -3,7 +3,6 @@ package com.example.ecommerce.dto.product;
 import com.example.ecommerce.common.enums.product.Category;
 import com.example.ecommerce.common.enums.product.Size;
 import lombok.Builder;
-import lombok.Getter;
 
 @Builder
 public record ProductDto(
@@ -15,6 +14,4 @@ public record ProductDto(
         Category category,
         Size size
 ) {
-
-
 }

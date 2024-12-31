@@ -45,7 +45,8 @@ public class Product extends BaseEntity{
     @OneToMany(mappedBy = "product")
     private List<Review> reviews;
 
-    private float avgRating;
+    @NotNull
+    private Float avgRating;
 
     public static ProductDto toDto(Product product){
         return ProductDto.builder()

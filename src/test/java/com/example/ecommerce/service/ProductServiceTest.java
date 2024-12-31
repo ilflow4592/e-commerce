@@ -23,18 +23,18 @@ import org.springframework.data.domain.Pageable;
 import java.util.Collections;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ProductServiceTest {
+class ProductServiceTest {
 
     @Mock
     private ProductRepository productRepository;
     @InjectMocks
     private ProductServiceImpl productService;
     private Product product;
-
 
     @BeforeEach
     void setUp() {
@@ -54,12 +54,12 @@ public class ProductServiceTest {
     void createProduct() {
         // given
         CreateProductDto createProductDto = CreateProductDto.builder()
-                .name("패딩 점퍼")
-                .description("방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.")
+                .name("치노 팬츠")
+                .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
                 .unitPrice(50000)
                 .stockQuantity(100)
-                .category(Category.OUTER)
-                .size(Size.L)
+                .category(Category.PANTS)
+                .size(Size.M)
                 .build();
 
         when(productRepository.save(any(Product.class))).thenReturn(product);
@@ -73,19 +73,43 @@ public class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("createProductDto에서 엔티티로 변환할 때, avgRating 필드는 0.0f로 설정되어야 한다.")
+    void createProduct_setDefaultAvgRatingToZero() {
+        // given
+        CreateProductDto createProductDto = CreateProductDto.builder()
+                .name("치노 팬츠")
+                .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
+                .unitPrice(50000)
+                .stockQuantity(100)
+                .category(Category.PANTS)
+                .size(Size.M)
+                .build();
+
+        // when
+        Product product = CreateProductDto.toEntity(createProductDto);
+
+        // then
+        assertThat(createProductDto.avgRating()).isEqualTo(null); // dto에서 avgRating을 null로
+        assertThat(product.getAvgRating()).isEqualTo(0.0f); // 엔티티에서는 0.0f로 세팅
+    }
+
+    @Test
     @DisplayName("존재하는 모든 상품을 조회할 수 있다.")
     void getAllProducts() {
         // given
         Page<Product> productsPage = new PageImpl<>(Collections.singletonList(product));
         Pageable pageable = PageRequest.of(0, 10);
+
         when(productRepository.findAll(pageable)).thenReturn(productsPage);
 
         // when
         PageableDto<ProductDto> result = productService.getAllProducts(pageable);
 
+        System.out.println("result = " + result);
         // then
         assertNotNull(result);
         assertEquals(1, result.size());
+        assertEquals(1, result.page());;
         verify(productRepository, times(1)).findAll(pageable);
     }
 
@@ -96,12 +120,11 @@ public class ProductServiceTest {
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         // when
-        ProductDto result = productService.getProduct(1L);
+        ProductDto productDto = productService.getProduct(1L);
 
         // then
-        assertNotNull(result);
-        assertEquals(product.getId(), result.id());
-        assertEquals(product.getName(), result.name());
+        assertNotNull(productDto);
+        assertThat(productDto).usingRecursiveComparison().isEqualTo(product);
         verify(productRepository, times(1)).findById(1L);
     }
 
@@ -136,7 +159,7 @@ public class ProductServiceTest {
 
         // then
         assertNotNull(result);
-        assertEquals(productDto.name(), result.name());
+        assertThat(result).usingRecursiveComparison().isEqualTo(product);
         verify(productRepository, times(1)).findById(1L);
     }
 
