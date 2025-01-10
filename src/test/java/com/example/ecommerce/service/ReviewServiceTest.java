@@ -57,7 +57,7 @@ public class ReviewServiceTest {
 
         product = Product.builder()
                 .id(2L)
-                .avgRating(0)
+                .avgRating(0.0f)
                 .build();
 
         review = Review.builder()
