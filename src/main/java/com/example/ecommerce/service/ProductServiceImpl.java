@@ -2,6 +2,7 @@ package com.example.ecommerce.service;
 
 import com.example.ecommerce.common.exception.product.ProductException;
 import com.example.ecommerce.common.exception.product.ProductNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.example.ecommerce.dto.product.CreateProductDto;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 @Service
 @Transactional(readOnly = true)
+@Slf4j
 public class ProductServiceImpl implements ProductService{
 
     private final ProductRepository productRepository;
@@ -25,6 +27,8 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public Long createProduct(CreateProductDto createProductDto) {
         Product product = CreateProductDto.toEntity(createProductDto);
+
+        log.info("dto로부터 변환된 Product 엔티티 :" + product);
 
         return productRepository.save(product).getId();
     }

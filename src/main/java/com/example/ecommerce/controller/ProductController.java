@@ -8,6 +8,7 @@ import com.example.ecommerce.dto.product.ProductDto;
 import com.example.ecommerce.repository.custom.ProductRepositoryCustom;
 import com.example.ecommerce.service.ProductService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +18,17 @@ import org.springframework.data.domain.Pageable;
 @RestController
 @RequestMapping("/api/v1/products")
 @AllArgsConstructor
+@Slf4j
 public class ProductController {
 
     private final ProductService productService;
     private final ProductRepositoryCustom productRepositoryCustom;
 
     @PostMapping
-    public ResponseEntity<Long> createProduct(@RequestBody CreateProductDto productDto){
-        Long productId = productService.createProduct(productDto);
+    public ResponseEntity<Long> createProduct(@RequestBody CreateProductDto createProductDto){
+        log.info("ProductController - createProduct(POST) : " + createProductDto);
+
+        Long productId = productService.createProduct(createProductDto);
         return new ResponseEntity<>(productId, HttpStatus.CREATED);
     }
 
