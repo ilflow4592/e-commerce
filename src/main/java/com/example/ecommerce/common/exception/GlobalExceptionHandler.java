@@ -14,10 +14,12 @@ import com.example.ecommerce.common.exception.user.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -32,6 +34,24 @@ public class GlobalExceptionHandler {
         response.put("message", message);
 
         return new ResponseEntity<>(response, status);
+    }
+
+    /**
+     * Validation Error Exception - Bean Validation (@Valid) 예외 처리
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException e) {
+        record FieldErrorMessage(String field, String message) {}
+
+        List<FieldErrorMessage> errors = e.getBindingResult().getFieldErrors()
+                .stream()
+                .map(fieldError -> new FieldErrorMessage(
+                        fieldError.getField(),
+                        fieldError.getDefaultMessage()
+                ))
+                .toList();
+
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
     /**
