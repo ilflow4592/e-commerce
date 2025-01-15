@@ -7,6 +7,7 @@ import com.example.ecommerce.dto.PageableDto;
 import com.example.ecommerce.dto.product.ProductDto;
 import com.example.ecommerce.repository.custom.ProductRepositoryCustom;
 import com.example.ecommerce.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class ProductController {
     private final ProductRepositoryCustom productRepositoryCustom;
 
     @PostMapping
-    public ResponseEntity<Long> createProduct(@RequestBody CreateProductDto createProductDto){
+    public ResponseEntity<Long> createProduct(@Valid @RequestBody CreateProductDto createProductDto){
         log.info("ProductController - createProduct(POST) : " + createProductDto);
 
         Long productId = productService.createProduct(createProductDto);
