@@ -21,7 +21,7 @@ public record CreateProductDto(
         Integer unitPrice,
 
         @NotNull
-        @Min(value = 1, message = "재고는 0일 수 없습니다.")
+        @Min(value = 1, message = "재고는 0 이하일 수 없습니다.")
         Integer stockQuantity,
 
         Category category,
@@ -29,7 +29,7 @@ public record CreateProductDto(
         Float avgRating
 ) {
 
-    public static Product toEntity(CreateProductDto dto){
+    public static Product toEntity(CreateProductDto dto, String fileKey){
         return Product.builder()
                 .name(dto.name)
                 .description(dto.description)
@@ -38,6 +38,7 @@ public record CreateProductDto(
                 .category(dto.category)
                 .size(dto.size)
                 .avgRating(dto.avgRating == null ? 0.0f : dto.avgRating) //초기값
+                .fileKey(fileKey)
                 .build();
     }
 

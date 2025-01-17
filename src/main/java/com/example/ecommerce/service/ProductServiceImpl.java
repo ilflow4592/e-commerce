@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+
 @AllArgsConstructor
 @Service
 @Transactional(readOnly = true)
@@ -25,8 +26,8 @@ public class ProductServiceImpl implements ProductService{
 
     @Transactional
     @Override
-    public Long createProduct(CreateProductDto createProductDto) {
-        Product product = CreateProductDto.toEntity(createProductDto);
+    public Long createProduct(CreateProductDto createProductDto, String fileKey) {
+        Product product = CreateProductDto.toEntity(createProductDto, fileKey);
 
         log.info("dto로부터 변환된 Product 엔티티 :" + product);
 

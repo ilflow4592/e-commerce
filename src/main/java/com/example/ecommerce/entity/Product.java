@@ -48,6 +48,9 @@ public class Product extends BaseEntity{
     @NotNull
     private Float avgRating;
 
+//    @NotNull
+    private String fileKey;
+
     public static ProductDto toDto(Product product){
         return ProductDto.builder()
                 .id(product.getId())
