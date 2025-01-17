@@ -7,6 +7,7 @@
 - ORM : Spring Data Jpa
 - 데이터베이스 : MySQL(8.0.32)
 - 테스트 : JUnit5, Mockito
+- 스토리지 : AWS S3
 
 ## ERD
 <img width="683" alt="Screen Shot 2025-01-17 at 3 06 07 PM" src="https://github.com/user-attachments/assets/ecde1560-06e4-490d-baac-2465c8402026" />
