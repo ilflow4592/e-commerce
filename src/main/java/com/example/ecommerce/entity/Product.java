@@ -48,6 +48,9 @@ public class Product extends BaseEntity{
     @NotNull
     private Float avgRating;
 
+    @NotNull
+    private Boolean shopDisplayable;
+
 //    @NotNull
     private String fileKey;
 

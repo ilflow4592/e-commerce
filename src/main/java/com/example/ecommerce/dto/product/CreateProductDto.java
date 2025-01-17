@@ -26,7 +26,8 @@ public record CreateProductDto(
 
         Category category,
         Size size,
-        Float avgRating
+        Float avgRating,
+        Boolean shopDisplayable
 ) {
 
     public static Product toEntity(CreateProductDto dto, String fileKey){
@@ -38,6 +39,7 @@ public record CreateProductDto(
                 .category(dto.category)
                 .size(dto.size)
                 .avgRating(dto.avgRating == null ? 0.0f : dto.avgRating) //초기값
+                .shopDisplayable(dto.shopDisplayable)
                 .fileKey(fileKey)
                 .build();
     }
