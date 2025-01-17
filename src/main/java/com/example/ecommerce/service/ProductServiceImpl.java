@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductServiceImpl implements ProductService{
 
     private final ProductRepository productRepository;
+    private final S3Service s3Service;
 
     @Transactional
     @Override
@@ -45,7 +46,12 @@ public class ProductServiceImpl implements ProductService{
     public ProductDto getProduct(Long id) {
         Product product = findProductById(id);
 
-        return Product.toDto(product);
+        String fileKey = product.getFileKey();
+
+        // S3에서 파일 URL을 생성
+        String fileUrl = s3Service.getPresignedUrl(fileKey);
+
+        return Product.toDto(product, fileUrl);
     }
 
     @Transactional

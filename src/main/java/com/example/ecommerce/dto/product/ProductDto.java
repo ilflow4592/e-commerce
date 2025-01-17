@@ -2,6 +2,7 @@ package com.example.ecommerce.dto.product;
 
 import com.example.ecommerce.common.enums.product.Category;
 import com.example.ecommerce.common.enums.product.Size;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +27,8 @@ public record ProductDto(
 
         Category category,
         Size size,
-        Boolean shopDisplayable
+        Boolean shopDisplayable,
+        @Nullable
+        String fileUrl
 ) {
 }

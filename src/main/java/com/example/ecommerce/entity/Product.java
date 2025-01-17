@@ -54,7 +54,11 @@ public class Product extends BaseEntity{
 //    @NotNull
     private String fileKey;
 
-    public static ProductDto toDto(Product product){
+    public static ProductDto toDto(Product product) {
+        return toDto(product, null);
+    }
+
+    public static ProductDto toDto(Product product, String fileUrl){
         return ProductDto.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -64,6 +68,7 @@ public class Product extends BaseEntity{
                 .category(product.getCategory())
                 .size(product.getSize())
                 .shopDisplayable(product.getShopDisplayable())
+                .fileUrl(fileUrl)
                 .build();
     }
 
