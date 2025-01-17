@@ -63,6 +63,7 @@ public class Product extends BaseEntity{
                 .stockQuantity(product.getStockQuantity())
                 .category(product.getCategory())
                 .size(product.getSize())
+                .shopDisplayable(product.getShopDisplayable())
                 .build();
     }
 

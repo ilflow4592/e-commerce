@@ -25,6 +25,7 @@ public record ProductDto(
         Integer stockQuantity,
 
         Category category,
-        Size size
+        Size size,
+        Boolean shopDisplayable
 ) {
 }
