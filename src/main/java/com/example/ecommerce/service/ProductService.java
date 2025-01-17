@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 public interface ProductService {
-    Long createProduct(CreateProductDto createProductDto, MultipartFile file, String fileKey);
+    Long createProduct(CreateProductDto createProductDto, MultipartFile file);
     PageableDto<ProductDto> getAllProducts(Pageable pageable);
     ProductDto getProduct(Long id);
     ProductDto updateProduct(Long id, ProductDto productDto);

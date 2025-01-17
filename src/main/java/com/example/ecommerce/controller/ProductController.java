@@ -26,7 +26,6 @@ public class ProductController {
 
     private final ProductService productService;
     private final ProductRepositoryCustom productRepositoryCustom;
-    private final S3Service s3Service;
 
     @PostMapping
     public ResponseEntity<?> createProduct(
@@ -38,12 +37,7 @@ public class ProductController {
         ResponseEntity<String> body = checkFileValidation(file);
         if (body != null) return body;
 
-        // 파일을 S3에 업로드
-        String fileKey = s3Service.uploadFile(file);
-
-        log.info("AWS S3 - generated fileKey : " + fileKey);
-
-        Long productId = productService.createProduct(createProductDto, file, fileKey);
+        Long productId = productService.createProduct(createProductDto, file);
         return new ResponseEntity<>(productId, HttpStatus.CREATED);
     }
 

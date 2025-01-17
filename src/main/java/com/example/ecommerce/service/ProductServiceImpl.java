@@ -27,7 +27,12 @@ public class ProductServiceImpl implements ProductService{
 
     @Transactional
     @Override
-    public Long createProduct(CreateProductDto createProductDto, MultipartFile file, String fileKey) {
+    public Long createProduct(CreateProductDto createProductDto, MultipartFile file) {
+        // 파일을 S3에 업로드
+        String fileKey = s3Service.uploadFile(file);
+
+        log.info("AWS S3 - generated fileKey : " + fileKey);
+
         Product product = CreateProductDto.toEntity(createProductDto, file, fileKey);
 
         log.info("dto로부터 변환된 Product 엔티티 :" + product);
