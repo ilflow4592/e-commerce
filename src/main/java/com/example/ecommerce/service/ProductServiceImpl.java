@@ -63,11 +63,19 @@ public class ProductServiceImpl implements ProductService{
 
     @Transactional
     @Override
-    public ProductDto updateProduct(Long id, ProductDto productDto) {
+    public ProductDto updateProduct(Long id, ProductDto productDto, MultipartFile file) {
+        String fileKey="";
+        
+        if(file!=null){
+            // 파일을 S3에 업로드
+            fileKey = s3Service.uploadFile(file);
+
+            log.info("AWS S3 - generated fileKey : " + fileKey);
+        }
+
         Product product = findProductById(id);
-
-        product.update(productDto);
-
+        
+        product.update(productDto, file != null ? file.getOriginalFilename() : null, fileKey);
 
         return Product.toDto(product);
     }

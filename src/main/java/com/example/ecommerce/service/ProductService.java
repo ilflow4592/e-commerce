@@ -11,6 +11,6 @@ public interface ProductService {
     Long createProduct(CreateProductDto createProductDto, MultipartFile file);
     PageableDto<ProductDto> getAllProducts(Pageable pageable);
     ProductDto getProduct(Long id);
-    ProductDto updateProduct(Long id, ProductDto productDto);
+    ProductDto updateProduct(Long id, ProductDto productDto, MultipartFile file);
     void deleteProduct(Long id);
 }

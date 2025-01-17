@@ -64,13 +64,16 @@ public class ProductController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @PatchMapping("{id}")
+    @PutMapping("{id}")
     public ResponseEntity<ProductDto> updateProduct(
             @PathVariable Long id,
-            @Valid @RequestBody ProductDto productDto){
+            @Valid @RequestPart(value = "productDto") ProductDto productDto,
+            @RequestPart(value = "file", required = false) MultipartFile file
+            ){
         log.info("ProductController - updateProduct(PATCH) : " + productDto);
+        log.info("file" + file);
 
-        ProductDto dto = productService.updateProduct(id, productDto);
+        ProductDto dto = productService.updateProduct(id, productDto, file);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 

@@ -77,12 +77,19 @@ public class Product extends BaseEntity{
     }
 
     public void update(ProductDto dto){
+        update(dto, null, null);
+    }
+
+    public void update(ProductDto dto, String fileName, String fileKey){
         if (dto.name() != null) this.name = dto.name();
         if (dto.description() != null) this.description = dto.description();
         if (dto.unitPrice() != null) this.unitPrice = dto.unitPrice();
         if (dto.stockQuantity() != null) this.stockQuantity = dto.stockQuantity();
         if (dto.category() != null) this.category = dto.category();
         if (dto.size() != null) this.size = dto.size();
+        if (dto.shopDisplayable() != null) this.shopDisplayable = dto.shopDisplayable();
+        if(fileName!=null) this.fileName = fileName;
+        if(fileKey!=null) this.fileKey = fileKey;
     }
 
     public void updateStockQuantity(Integer stockQuantity){
