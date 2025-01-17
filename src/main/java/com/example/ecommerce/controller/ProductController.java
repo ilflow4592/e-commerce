@@ -43,7 +43,7 @@ public class ProductController {
 
         log.info("AWS S3 - generated fileKey : " + fileKey);
 
-        Long productId = productService.createProduct(createProductDto, fileKey);
+        Long productId = productService.createProduct(createProductDto, file, fileKey);
         return new ResponseEntity<>(productId, HttpStatus.CREATED);
     }
 

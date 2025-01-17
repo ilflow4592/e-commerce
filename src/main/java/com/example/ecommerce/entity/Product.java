@@ -52,13 +52,16 @@ public class Product extends BaseEntity{
     private Boolean shopDisplayable;
 
 //    @NotNull
+    private String fileName;
+
+//    @NotNull
     private String fileKey;
 
     public static ProductDto toDto(Product product) {
-        return toDto(product, null);
+        return toDto(product, null, null);
     }
 
-    public static ProductDto toDto(Product product, String fileUrl){
+    public static ProductDto toDto(Product product, String fileName, String fileUrl){
         return ProductDto.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -68,6 +71,7 @@ public class Product extends BaseEntity{
                 .category(product.getCategory())
                 .size(product.getSize())
                 .shopDisplayable(product.getShopDisplayable())
+                .fileName(fileName)
                 .fileUrl(fileUrl)
                 .build();
     }

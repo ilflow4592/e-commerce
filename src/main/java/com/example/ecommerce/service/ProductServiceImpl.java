@@ -13,7 +13,7 @@ import com.example.ecommerce.repository.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.web.multipart.MultipartFile;
 
 
 @AllArgsConstructor
@@ -27,8 +27,8 @@ public class ProductServiceImpl implements ProductService{
 
     @Transactional
     @Override
-    public Long createProduct(CreateProductDto createProductDto, String fileKey) {
-        Product product = CreateProductDto.toEntity(createProductDto, fileKey);
+    public Long createProduct(CreateProductDto createProductDto, MultipartFile file, String fileKey) {
+        Product product = CreateProductDto.toEntity(createProductDto, file, fileKey);
 
         log.info("dto로부터 변환된 Product 엔티티 :" + product);
 
@@ -51,7 +51,9 @@ public class ProductServiceImpl implements ProductService{
         // S3에서 파일 URL을 생성
         String fileUrl = s3Service.getPresignedUrl(fileKey);
 
-        return Product.toDto(product, fileUrl);
+        String fileName = product.getFileName();
+
+        return Product.toDto(product, fileName, fileUrl);
     }
 
     @Transactional
@@ -60,6 +62,7 @@ public class ProductServiceImpl implements ProductService{
         Product product = findProductById(id);
 
         product.update(productDto);
+
 
         return Product.toDto(product);
     }

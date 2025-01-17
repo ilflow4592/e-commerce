@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
+import org.springframework.web.multipart.MultipartFile;
 
 @Builder
 public record CreateProductDto(
@@ -30,7 +31,7 @@ public record CreateProductDto(
         Boolean shopDisplayable
 ) {
 
-    public static Product toEntity(CreateProductDto dto, String fileKey){
+    public static Product toEntity(CreateProductDto dto, MultipartFile file, String fileKey){
         return Product.builder()
                 .name(dto.name)
                 .description(dto.description)
@@ -40,6 +41,7 @@ public record CreateProductDto(
                 .size(dto.size)
                 .avgRating(dto.avgRating == null ? 0.0f : dto.avgRating) //초기값
                 .shopDisplayable(dto.shopDisplayable)
+                .fileName(file.getOriginalFilename())
                 .fileKey(fileKey)
                 .build();
     }

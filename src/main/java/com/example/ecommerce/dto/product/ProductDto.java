@@ -29,6 +29,8 @@ public record ProductDto(
         Size size,
         Boolean shopDisplayable,
         @Nullable
+        String fileName,
+        @Nullable
         String fileUrl
 ) {
 }
