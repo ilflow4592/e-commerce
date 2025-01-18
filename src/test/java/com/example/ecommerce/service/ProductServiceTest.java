@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -32,6 +33,8 @@ class ProductServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    private S3Service s3Service;
     @InjectMocks
     private ProductServiceImpl productService;
     private Product product;
@@ -62,14 +65,25 @@ class ProductServiceTest {
                 .size(Size.M)
                 .build();
 
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "test-image.png",
+                "image/png",
+                new byte[0]
+        );
+
+        String fakeFileKey = "generated-file-key";
+        when(s3Service.uploadFile(file)).thenReturn(fakeFileKey);
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
         // when
-        Long productId = productService.createProduct(createProductDto);
+        Product product = CreateProductDto.toEntity(createProductDto, file, fakeFileKey);
+        Long productId = productService.createProduct(createProductDto, file);
 
         // then
         assertEquals(product.getId(), productId);
-        verify(productRepository, times(1)).save(any(Product.class));
+        verify(s3Service, times(1)).uploadFile(file); // S3 업로드 검증
+        verify(productRepository, times(1)).save(any(Product.class)); // DB 저장 검증
     }
 
     @Test
@@ -85,12 +99,22 @@ class ProductServiceTest {
                 .size(Size.M)
                 .build();
 
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "test-image.png",
+                "image/png",
+                new byte[0]
+        );
+
+        String fakeFileKey = "generated-file-key";
+
         // when
-        Product product = CreateProductDto.toEntity(createProductDto);
+        Product product = CreateProductDto.toEntity(createProductDto, file, fakeFileKey);
 
         // then
-        assertThat(createProductDto.avgRating()).isEqualTo(null); // dto에서 avgRating을 null로
-        assertThat(product.getAvgRating()).isEqualTo(0.0f); // 엔티티에서는 0.0f로 세팅
+        assertThat(createProductDto.avgRating()).isEqualTo(null); //  DTO의 avgRating은 null이어야 함
+        assertThat(product.getAvgRating()).isEqualTo(0.0f); //  엔티티에서는 0.0f로 설정되어야 함
+        assertThat(product.getFileKey()).isEqualTo(fakeFileKey); //  fileKey가 정상적으로 설정되어야 함
     }
 
     @Test
@@ -140,8 +164,8 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("상품을 갱신할 수 있다.")
-    void updateProduct() {
+    @DisplayName("상품을 갱신할 수 있다. (파일 없이)")
+    void updateProductWithoutFile() {
         // given
         ProductDto productDto = ProductDto.builder()
                 .name("패딩 점퍼")
@@ -152,15 +176,72 @@ class ProductServiceTest {
                 .size(Size.L)
                 .build();
 
-        when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
+        //모킹 객체
+        Product product = spy(Product.builder()
+                .name("패딩 점퍼")
+                .description("방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.")
+                .unitPrice(50000)
+                .stockQuantity(100)
+                .category(Category.OUTER)
+                .size(Size.L)
+                .build()
+        );
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
         // when
-        ProductDto result = productService.updateProduct(1L, productDto);
+        ProductDto result = productService.updateProduct(1L, productDto, null);
 
         // then
         assertNotNull(result);
-        assertThat(result).usingRecursiveComparison().isEqualTo(product);
         verify(productRepository, times(1)).findById(1L);
+        verify(s3Service, never()).uploadFile(any()); // 파일 업로드가 호출되지 않아야 함
+        verify(product, times(1)).update(productDto, null, null); // fileName과 fileKey가 null로 전달되어야 함
+    }
+
+    @Test
+    @DisplayName("상품을 갱신할 수 있다. (파일 포함)")
+    void updateProductWithFile() {
+        // given
+        ProductDto productDto = ProductDto.builder()
+                .name("패딩 점퍼")
+                .description("방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.")
+                .unitPrice(50000)
+                .stockQuantity(100)
+                .category(Category.OUTER)
+                .size(Size.L)
+                .build();
+
+        //모킹 객체
+        Product product = spy(Product.builder()
+                .name("패딩 점퍼")
+                .description("방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.")
+                .unitPrice(50000)
+                .stockQuantity(100)
+                .category(Category.OUTER)
+                .size(Size.L)
+                .build()
+        );
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "updated-image.png",
+                "image/png",
+                new byte[0]
+        );
+
+        String fakeFileKey = "updated-file-key";
+        when(s3Service.uploadFile(file)).thenReturn(fakeFileKey);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+        // when
+        ProductDto result = productService.updateProduct(1L, productDto, file);
+
+        // then
+        assertNotNull(result);
+        verify(productRepository, times(1)).findById(1L);
+        verify(s3Service, times(1)).uploadFile(file); // 파일 업로드가 호출되어야 함
+        verify(product, times(1)).update(productDto, "updated-image.png", fakeFileKey); // 파일명과 fileKey가 올바르게 전달됨
     }
 
     @Test

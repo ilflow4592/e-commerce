@@ -64,7 +64,7 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     @Override
     public ProductDto updateProduct(Long id, ProductDto productDto, MultipartFile file) {
-        String fileKey="";
+        String fileKey = null;
         
         if(file!=null){
             // 파일을 S3에 업로드
