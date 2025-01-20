@@ -7,7 +7,6 @@ import com.example.ecommerce.dto.PageableDto;
 import com.example.ecommerce.dto.product.ProductDto;
 import com.example.ecommerce.repository.custom.ProductRepositoryCustom;
 import com.example.ecommerce.service.ProductService;
-import com.example.ecommerce.service.S3Service;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 
 @RestController
@@ -56,6 +57,12 @@ public class ProductController {
     public ResponseEntity<PageableDto<ProductDto>> getAllProducts(Pageable pageable){
         PageableDto<ProductDto> pageableProductDto = productService.getAllProducts(pageable);
         return new ResponseEntity<>(pageableProductDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/shop")
+    public ResponseEntity<List<ProductDto>> getShopDisplayableProducts(){
+        List<ProductDto> shopDisplayableProducts = productService.getShopDisplayableProducts();
+        return new ResponseEntity<>(shopDisplayableProducts, HttpStatus.OK);
     }
 
     @GetMapping("{id}")
