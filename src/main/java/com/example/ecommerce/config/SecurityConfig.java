@@ -20,13 +20,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register").permitAll()
                         .requestMatchers("/api/v1/products/shop**").permitAll() // shop 영역
-                        .anyRequest().authenticated() // admin 영역
-//                                .anyRequest().permitAll()
+//                        .anyRequest().authenticated() // admin 영역
+                                .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionFixation().none()
+                        .maximumSessions(1)
+                        .expiredUrl("/admin/login")
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .logout(logout -> logout.logoutUrl("/api/v1/auth/logout"));
 
         return http.build();
