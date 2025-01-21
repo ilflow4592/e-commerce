@@ -1,10 +1,9 @@
 package com.example.ecommerce.dto.user;
 
+import com.example.ecommerce.common.enums.user.UserRole;
+import com.example.ecommerce.common.validator.EnumValidator;
 import com.example.ecommerce.entity.User;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 
 @Builder
@@ -23,7 +22,12 @@ public record RegisterUserDto(
 
         @NotBlank(message = "전화번호를 입력해주세요")
         @Pattern(regexp = "^[0-9]{10,15}$", message = "전화번호는 숫자 10~15자리여야 합니다")
-        String phoneNumber) {
+        String phoneNumber,
+
+        @NotNull(message = "유저 역할을 입력해주세요")
+        @EnumValidator(enumClass = UserRole.class)
+        UserRole role
+        ) {
 
     public static User toEntity(RegisterUserDto dto) {
         return User.builder()

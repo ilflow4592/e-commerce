@@ -1,7 +1,7 @@
 package com.example.ecommerce.entity;
 
+import com.example.ecommerce.common.enums.user.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -30,4 +30,7 @@ public class User extends BaseEntity {
 
     @JsonIgnore
     private String phoneNumber;
+
+//    @NotNull
+    private UserRole role;
 }

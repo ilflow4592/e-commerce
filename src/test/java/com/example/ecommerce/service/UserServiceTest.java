@@ -1,5 +1,6 @@
 package com.example.ecommerce.service;
 
+import com.example.ecommerce.common.enums.user.UserRole;
 import com.example.ecommerce.dto.user.RegisterUserDto;
 import com.example.ecommerce.entity.User;
 import com.example.ecommerce.repository.UserRepository;
@@ -49,6 +50,7 @@ public class UserServiceTest {
                 .email("honggildong@example.com")
                 .password("SecurePass123!")
                 .phoneNumber("01012345678")
+                .role(UserRole.USER) // 기본값 USER 추가
                 .build();
     }
 
@@ -60,6 +62,7 @@ public class UserServiceTest {
                 .email("johndoe@example.com")
                 .password("StrongPassword456$")
                 .phoneNumber("123456789012")
+                .role(UserRole.USER)
                 .build();
 
         Set<ConstraintViolation<RegisterUserDto>> violations = validator.validate(dto);
@@ -74,6 +77,7 @@ public class UserServiceTest {
                 .email("johndoe@example.com")
                 .password("StrongPassword456$")
                 .phoneNumber("123456789012")
+                .role(UserRole.USER)
                 .build();
 
         Set<ConstraintViolation<RegisterUserDto>> violations = validator.validate(dto);
@@ -88,6 +92,7 @@ public class UserServiceTest {
                 .email("invalid-email")
                 .password("StrongPassword456$")
                 .phoneNumber("123456789012")
+                .role(UserRole.USER)
                 .build();
 
         Set<ConstraintViolation<RegisterUserDto>> violations = validator.validate(dto);
@@ -102,6 +107,7 @@ public class UserServiceTest {
                 .email("johndoe@example.com")
                 .password("12345")
                 .phoneNumber("123456789012")
+                .role(UserRole.USER)
                 .build();
 
         Set<ConstraintViolation<RegisterUserDto>> violations = validator.validate(dto);
@@ -116,9 +122,43 @@ public class UserServiceTest {
                 .email("johndoe@example.com")
                 .password("StrongPassword456$")
                 .phoneNumber("1234")
+                .role(UserRole.USER)
                 .build();
 
         Set<ConstraintViolation<RegisterUserDto>> violations = validator.validate(dto);
         Assertions.assertThat(violations).extracting("message").contains("전화번호는 숫자 10~15자리여야 합니다");
+    }
+
+
+    @Test
+    @DisplayName("올바른 역할(USER, ADMIN)만 허용되어야 한다")
+    void validUserRoleShouldPass() {
+        RegisterUserDto dto = RegisterUserDto.builder()
+                .name("John Doe")
+                .email("johndoe@example.com")
+                .password("StrongPassword456$")
+                .phoneNumber("123456789012")
+                .role(UserRole.ADMIN)
+                .build();
+
+        Set<ConstraintViolation<RegisterUserDto>> violations = validator.validate(dto);
+        Assertions.assertThat(violations).isEmpty();
+    }
+
+    @Test
+    @DisplayName("잘못된 역할을 입력하면 검증에 실패해야 한다")
+    void invalidUserRoleShouldFail() {
+        RegisterUserDto dto = RegisterUserDto.builder()
+                .name("John Doe")
+                .email("johndoe@example.com")
+                .password("StrongPassword456$")
+                .phoneNumber("123456789012")
+                .role(null)
+                .build();
+
+        Set<ConstraintViolation<RegisterUserDto>> violations = validator.validate(dto);
+        Assertions.assertThat(violations)
+                .extracting("message")
+                .contains("올바른 유저 역할을 입력해주세요 (USER 또는 ADMIN)");
     }
 }
