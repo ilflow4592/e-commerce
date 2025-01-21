@@ -21,7 +21,7 @@ public record UserDto(
     }
 
 
-    public static User toEntity(SignUpDto dto) {
+    public static User toEntity(RegisterUserDto dto) {
         return User.builder()
                 .name(dto.name())
                 .email(dto.email())
