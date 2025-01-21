@@ -31,6 +31,7 @@ public class User extends BaseEntity {
     @JsonIgnore
     private String phoneNumber;
 
-//    @NotNull
+    @NotNull
+    @Enumerated(EnumType.STRING)
     private UserRole role;
 }

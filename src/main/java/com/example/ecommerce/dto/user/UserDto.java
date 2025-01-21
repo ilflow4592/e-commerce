@@ -27,6 +27,7 @@ public record UserDto(
                 .email(dto.email())
                 .password(dto.password())
                 .phoneNumber(dto.phoneNumber())
+                .role(dto.role())
                 .build();
     }
 
