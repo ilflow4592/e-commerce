@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException e) {
-        record FieldErrorMessage(String field, String message) {}
+        record FieldErrorMessage(String error, String message) {}
 
         List<FieldErrorMessage> errors = e.getBindingResult().getFieldErrors()
                 .stream()
