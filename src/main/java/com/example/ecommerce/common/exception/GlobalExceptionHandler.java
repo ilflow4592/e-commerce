@@ -9,6 +9,7 @@ import com.example.ecommerce.common.exception.product.ProductNotFoundException;
 import com.example.ecommerce.common.exception.product.ProductOutOfStockException;
 import com.example.ecommerce.common.exception.review.ReviewAlreadyExistsException;
 import com.example.ecommerce.common.exception.review.ReviewNotFoundException;
+import com.example.ecommerce.common.exception.user.PasswordDontMatchException;
 import com.example.ecommerce.common.exception.user.UserEmailDuplicateException;
 import com.example.ecommerce.common.exception.user.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +68,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleUserNotFoundException(UserNotFoundException ex) {
         log.warn("UserNotFoundException 발생: {}", ex.getMessage(), ex);
+
+        return errorResponse(ex.getStatus(), ex.getMessage());
+    }
+
+    @ExceptionHandler(PasswordDontMatchException.class)
+    public ResponseEntity<Map<String, Object>> handlePasswordDontMatchException(PasswordDontMatchException ex) {
+        log.warn("PasswordDontMatchException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
     }
