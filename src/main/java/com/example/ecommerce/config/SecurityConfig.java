@@ -17,20 +17,22 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register").permitAll()
+                        .requestMatchers("/api/v1/login", "/api/v1/register").permitAll()
                         .requestMatchers("/api/v1/products/shop**").permitAll() // shop 영역
 //                        .anyRequest().authenticated() // admin 영역
                                 .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session
+                        .invalidSessionUrl("http://localhost:3000/admin/login")
                         .sessionFixation().none()
                         .maximumSessions(1)
-                        .expiredUrl("/admin/login")
+                        .expiredUrl("http://localhost:3000/admin/login")
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .logout(logout -> logout.logoutUrl("/api/v1/auth/logout"));
+                .logout(logout -> logout.logoutUrl("http://localhost:3000/api/v1/logout"));
 
         return http.build();
     }

@@ -58,6 +58,7 @@ public class UserServiceImpl implements UserService {
 
         if (userOptional.isPresent() && passwordEncoder.matches(loginUserDto.password(), userOptional.get().getPassword())) {
             session.setAttribute("user", userOptional.get());
+            session.setMaxInactiveInterval(10);
         }
         else{
             throw new PasswordDontMatchException(UserException.PASSWORD_DONT_MATCH.getStatus(), UserException.PASSWORD_DONT_MATCH.getMessage());
