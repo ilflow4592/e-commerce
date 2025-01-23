@@ -5,7 +5,6 @@ import com.example.ecommerce.common.enums.product.Size;
 import com.example.ecommerce.dto.product.CreateProductDto;
 import com.example.ecommerce.dto.PageableDto;
 import com.example.ecommerce.dto.product.ProductDto;
-import com.example.ecommerce.repository.custom.ProductRepositoryCustom;
 import com.example.ecommerce.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -16,8 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -26,7 +23,6 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
-    private final ProductRepositoryCustom productRepositoryCustom;
 
     @PostMapping
     public ResponseEntity<?> createProduct(
@@ -46,9 +42,10 @@ public class ProductController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Category category,
             @RequestParam(required = false) Size productSize,
+            @RequestParam(required = false) String entryPoint,
             Pageable pageable
     ){
-        PageableDto<ProductDto> productDtoPageableDto = productRepositoryCustom.searchProducts(keyword, category, productSize, pageable);
+        PageableDto<ProductDto> productDtoPageableDto = productService.searchProducts(keyword, category, productSize, pageable, entryPoint);
         return new ResponseEntity<>(productDtoPageableDto,HttpStatus.OK);
     }
 
