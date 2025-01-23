@@ -1,7 +1,10 @@
 package com.example.ecommerce.service;
 
+import com.example.ecommerce.common.enums.product.Category;
+import com.example.ecommerce.common.enums.product.Size;
 import com.example.ecommerce.common.exception.product.ProductException;
 import com.example.ecommerce.common.exception.product.ProductNotFoundException;
+import com.example.ecommerce.repository.custom.ProductRepositoryCustom;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,6 +30,7 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService{
 
     private final ProductRepository productRepository;
+    private final ProductRepositoryCustom productRepositoryCustom;
     private final S3Service s3Service;
 
     @Transactional
@@ -42,6 +46,15 @@ public class ProductServiceImpl implements ProductService{
         log.info("dto로부터 변환된 Product 엔티티 :" + product);
 
         return productRepository.save(product).getId();
+    }
+
+    @Override
+    public PageableDto<ProductDto> searchProducts(String keyword, Category category, Size productSize, Pageable pageable, String entryPoint) {
+        PageableDto<Product> productDtoPageableDto = productRepositoryCustom.searchProducts(keyword, category, productSize, pageable, entryPoint);
+
+        List<ProductDto> productDtoList = convertToProductDtoList(productDtoPageableDto.data());
+
+        return new PageableDto<>(productDtoList, productDtoPageableDto.last(), productDtoPageableDto.page(), productDtoPageableDto.size());
     }
 
     @Override
@@ -61,24 +74,7 @@ public class ProductServiceImpl implements ProductService{
 
         log.info("쇼핑몰 노출 상품 목록 : " + shopDisplayableProducts);
 
-        List<ProductDto> productDtoList = shopDisplayableProducts.stream()
-                .map(product -> {
-                    String fileKey = product.getFileKey();
-                    String fileUrl = s3Service.getPresignedUrl(fileKey);
-
-                    return ProductDto.builder()
-                            .id(product.getId())
-                            .name(product.getName())
-                            .description(product.getDescription())
-                            .unitPrice(product.getUnitPrice())
-                            .stockQuantity(product.getStockQuantity())
-                            .category(product.getCategory())
-                            .size(product.getSize())
-                            .fileName(product.getFileName())
-                            .fileUrl(fileUrl)
-                            .build();
-                })
-                .collect(Collectors.toList());
+        List<ProductDto> productDtoList = convertToProductDtoList(shopDisplayableProducts);
 
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), productDtoList.size());
@@ -133,5 +129,26 @@ public class ProductServiceImpl implements ProductService{
     private Product findProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(ProductException.NOTFOUND.getStatus(), ProductException.NOTFOUND.getMessage()));
+    }
+
+    private List<ProductDto> convertToProductDtoList(List<Product> productDtoPageableDto) {
+        return productDtoPageableDto.stream()
+                .map(product -> {
+                    String fileKey = product.getFileKey();
+                    String fileUrl = s3Service.getPresignedUrl(fileKey);
+
+                    return ProductDto.builder()
+                            .id(product.getId())
+                            .name(product.getName())
+                            .description(product.getDescription())
+                            .unitPrice(product.getUnitPrice())
+                            .stockQuantity(product.getStockQuantity())
+                            .category(product.getCategory())
+                            .size(product.getSize())
+                            .fileName(product.getFileName())
+                            .fileUrl(fileUrl)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 }

@@ -3,7 +3,6 @@ package com.example.ecommerce.repository.custom;
 import com.example.ecommerce.common.enums.product.Category;
 import com.example.ecommerce.common.enums.product.Size;
 import com.example.ecommerce.dto.PageableDto;
-import com.example.ecommerce.dto.product.ProductDto;
 import com.example.ecommerce.entity.Product;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -26,7 +25,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
      * 검색 시, Full-Text 인덱스 활용을 위한 네이티브 쿼리 작성
      */
     @Override
-    public PageableDto<ProductDto> searchProducts(String keyword, Category category, Size productSize, Pageable pageable) {
+    public PageableDto<Product> searchProducts(String keyword, Category category, Size productSize, Pageable pageable, String entryPoint) {
         // 기본 네이티브 쿼리와 COUNT 쿼리 공통 부분 생성
         String baseQuery = "MATCH(name) AGAINST (:keyword IN BOOLEAN MODE)";
 
@@ -38,6 +37,9 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         }
         if (productSize != null) {
             filterConditions.append(" AND product_size = :product_size");
+        }
+        if(entryPoint.equals("shop")){
+            filterConditions.append(" AND shop_displayable = 1");
         }
 
         // 데이터 조회 쿼리
@@ -75,6 +77,6 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 totalElements
         );
 
-        return PageableDto.toDto(pageableProducts.map(Product::toDto));
+        return PageableDto.toDto(pageableProducts);
     }
 }
