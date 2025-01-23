@@ -4,6 +4,7 @@ import com.example.ecommerce.common.exception.product.ProductException;
 import com.example.ecommerce.common.exception.product.ProductNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import com.example.ecommerce.dto.product.CreateProductDto;
 import com.example.ecommerce.dto.PageableDto;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,41 +52,41 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public List<ProductDto> getShopDisplayableProducts() {
+    public PageableDto<ProductDto> getShopDisplayableProducts(Pageable pageable) {
         List<Product> products = productRepository.findAll();
 
         List<Product> shopDisplayableProducts = products.stream()
-                .filter(p -> p != null && Boolean.TRUE.equals(p.getShopDisplayable())) // null일 경우 false로 처리
-                .collect(Collectors.toList());
+                .filter(p -> p != null && Boolean.TRUE.equals(p.getShopDisplayable()))
+                .toList();
 
         log.info("쇼핑몰 노출 상품 목록 : " + shopDisplayableProducts);
 
-        List<ProductDto> productDtoList = new ArrayList<>();
+        List<ProductDto> productDtoList = shopDisplayableProducts.stream()
+                .map(product -> {
+                    String fileKey = product.getFileKey();
+                    String fileUrl = s3Service.getPresignedUrl(fileKey);
 
-        shopDisplayableProducts.forEach(product -> {
-            String fileKey = product.getFileKey();
+                    return ProductDto.builder()
+                            .id(product.getId())
+                            .name(product.getName())
+                            .description(product.getDescription())
+                            .unitPrice(product.getUnitPrice())
+                            .stockQuantity(product.getStockQuantity())
+                            .category(product.getCategory())
+                            .size(product.getSize())
+                            .fileName(product.getFileName())
+                            .fileUrl(fileUrl)
+                            .build();
+                })
+                .collect(Collectors.toList());
 
-            // S3에서 파일 URL을 생성
-            String fileUrl = s3Service.getPresignedUrl(fileKey);
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), productDtoList.size());
+        List<ProductDto> pagedList = productDtoList.subList(start, end);
 
-            String fileName = product.getFileName();
+        Page<ProductDto> productDtoPage = new PageImpl<>(pagedList, pageable, productDtoList.size());
 
-            ProductDto productDto = ProductDto.builder()
-                    .id(product.getId())
-                    .name(product.getName())
-                    .description(product.getDescription())
-                    .unitPrice(product.getUnitPrice())
-                    .stockQuantity(product.getStockQuantity())
-                    .category(product.getCategory())
-                    .size(product.getSize())
-                    .fileName(fileName)
-                    .fileUrl(fileUrl)
-                    .build();
-
-            productDtoList.add(productDto);
-        });
-
-        return productDtoList;
+        return PageableDto.toDto(productDtoPage);
     }
 
     @Override

@@ -41,7 +41,6 @@ public class ProductController {
         Long productId = productService.createProduct(createProductDto, file);
         return new ResponseEntity<>(productId, HttpStatus.CREATED);
     }
-
     @GetMapping("/search")
     public ResponseEntity<PageableDto<ProductDto>> searchProducts(
             @RequestParam(required = false) String keyword,
@@ -58,10 +57,9 @@ public class ProductController {
         PageableDto<ProductDto> pageableProductDto = productService.getAllProducts(pageable);
         return new ResponseEntity<>(pageableProductDto, HttpStatus.OK);
     }
-
     @GetMapping("/shop")
-    public ResponseEntity<List<ProductDto>> getShopDisplayableProducts(){
-        List<ProductDto> shopDisplayableProducts = productService.getShopDisplayableProducts();
+    public ResponseEntity<PageableDto<ProductDto>> getShopDisplayableProducts(Pageable pageable){
+        PageableDto<ProductDto> shopDisplayableProducts = productService.getShopDisplayableProducts(pageable);
         return new ResponseEntity<>(shopDisplayableProducts, HttpStatus.OK);
     }
 

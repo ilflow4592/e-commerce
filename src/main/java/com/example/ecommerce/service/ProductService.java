@@ -12,7 +12,7 @@ import java.util.List;
 public interface ProductService {
     Long createProduct(CreateProductDto createProductDto, MultipartFile file);
     PageableDto<ProductDto> getAllProducts(Pageable pageable);
-    List<ProductDto> getShopDisplayableProducts();
+    PageableDto<ProductDto> getShopDisplayableProducts(Pageable pageable);
     ProductDto getProduct(Long id);
     ProductDto updateProduct(Long id, ProductDto productDto, MultipartFile file);
     void deleteProduct(Long id);
