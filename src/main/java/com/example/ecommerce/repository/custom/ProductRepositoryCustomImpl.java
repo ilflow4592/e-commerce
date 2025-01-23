@@ -38,8 +38,8 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         if (productSize != null) {
             filterConditions.append(" AND product_size = :product_size");
         }
-        if(entryPoint.equals("shop")){
-            filterConditions.append(" AND shop_displayable = 1");
+        if(entryPoint != null && entryPoint.equals("shop")){
+                filterConditions.append(" AND shop_displayable = 1");
         }
 
         // 데이터 조회 쿼리
