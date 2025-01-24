@@ -49,6 +49,8 @@ class ProductServiceTest {
                 .stockQuantity(100)
                 .category(Category.PANTS)
                 .size(Size.M)
+                .fileName("file_name")
+                .fileKey("file_key")
                 .build();
     }
 
@@ -77,8 +79,10 @@ class ProductServiceTest {
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
         // when
-        Product product = CreateProductDto.toEntity(createProductDto, file, fakeFileKey);
         Long productId = productService.createProduct(createProductDto, file);
+
+        System.out.println("product.getId() = " + product.getId());
+        System.out.println("productId = " + productId);
 
         // then
         assertEquals(product.getId(), productId);
@@ -141,14 +145,28 @@ class ProductServiceTest {
     @DisplayName("단일 상품을 조회할 수 있다.")
     void getProduct() {
         // given
+        ProductDto dto = ProductDto.builder()
+                .id(1L)
+                .name("치노 팬츠")
+                .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
+                .unitPrice(50000)
+                .stockQuantity(100)
+                .category(Category.PANTS)
+                .size(Size.M)
+                .fileName("file_name")
+                .fileUrl(null)
+                .build();
+
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         // when
         ProductDto productDto = productService.getProduct(1L);
 
+        System.out.println("productDto = " + productDto);
+
         // then
         assertNotNull(productDto);
-        assertThat(productDto).usingRecursiveComparison().isEqualTo(product);
+        assertThat(productDto).usingRecursiveComparison().isEqualTo(dto);
         verify(productRepository, times(1)).findById(1L);
     }
 
