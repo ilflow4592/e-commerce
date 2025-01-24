@@ -12,16 +12,15 @@ import com.example.ecommerce.common.exception.review.ReviewNotFoundException;
 import com.example.ecommerce.common.exception.user.PasswordDontMatchException;
 import com.example.ecommerce.common.exception.user.UserEmailDuplicateException;
 import com.example.ecommerce.common.exception.user.UserNotFoundException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @ControllerAdvice
@@ -41,16 +40,19 @@ public class GlobalExceptionHandler {
      * Validation Error Exception - Bean Validation (@Valid) 예외 처리
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException e) {
-        record FieldErrorMessage(String error, String message) {}
+    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        record FieldErrorMessage(HttpStatus error, String message, int value) {
 
-        List<FieldErrorMessage> errors = e.getBindingResult().getFieldErrors()
-                .stream()
-                .map(fieldError -> new FieldErrorMessage(
-                        fieldError.getField(),
-                        fieldError.getDefaultMessage()
-                ))
-                .toList();
+        }
+
+        List<FieldErrorMessage> errors = ex.getBindingResult().getFieldErrors()
+            .stream()
+            .map(fieldError -> new FieldErrorMessage(
+                HttpStatus.BAD_REQUEST,
+                fieldError.getDefaultMessage(),
+                ex.getStatusCode().value()
+            ))
+            .toList();
 
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
@@ -59,38 +61,43 @@ public class GlobalExceptionHandler {
      * User Exception
      */
     @ExceptionHandler(UserEmailDuplicateException.class)
-    public ResponseEntity<Map<String, Object>> handleUserEmailDuplicateException(UserEmailDuplicateException ex) {
+    public ResponseEntity<Map<String, Object>> handleUserEmailDuplicateException(
+        UserEmailDuplicateException ex) {
         log.warn("UserEmailDuplicateException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleUserNotFoundException(UserNotFoundException ex) {
+    public ResponseEntity<Map<String, Object>> handleUserNotFoundException(
+        UserNotFoundException ex) {
         log.warn("UserNotFoundException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
     }
 
     @ExceptionHandler(PasswordDontMatchException.class)
-    public ResponseEntity<Map<String, Object>> handlePasswordDontMatchException(PasswordDontMatchException ex) {
+    public ResponseEntity<Map<String, Object>> handlePasswordDontMatchException(
+        PasswordDontMatchException ex) {
         log.warn("PasswordDontMatchException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
     }
 
     /**
-     *Product Exception
+     * Product Exception
      */
     @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleProductNotFoundException(ProductNotFoundException ex) {
+    public ResponseEntity<Map<String, Object>> handleProductNotFoundException(
+        ProductNotFoundException ex) {
         log.warn("ProductNotFoundException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
     }
 
     @ExceptionHandler(ProductOutOfStockException.class)
-    public ResponseEntity<Map<String, Object>> handleProductOutOfStockException(ProductOutOfStockException ex) {
+    public ResponseEntity<Map<String, Object>> handleProductOutOfStockException(
+        ProductOutOfStockException ex) {
         log.warn("ProductOutOfStockException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
@@ -100,14 +107,16 @@ public class GlobalExceptionHandler {
      * Order Exception
      */
     @ExceptionHandler(OrderTotalPriceNotCorrectException.class)
-    public ResponseEntity<Map<String, Object>> handleOrderTotalPriceNotCorrectException(OrderTotalPriceNotCorrectException ex) {
+    public ResponseEntity<Map<String, Object>> handleOrderTotalPriceNotCorrectException(
+        OrderTotalPriceNotCorrectException ex) {
         log.warn("OrderTotalPriceNotCorrectException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
     }
 
     @ExceptionHandler(OrderNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleOrderNotFoundException(OrderNotFoundException ex) {
+    public ResponseEntity<Map<String, Object>> handleOrderNotFoundException(
+        OrderNotFoundException ex) {
         log.warn("OrderNotFoundException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
@@ -117,7 +126,8 @@ public class GlobalExceptionHandler {
      * OrderItem Exception
      */
     @ExceptionHandler(OrderItemNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleOrderItemNotFoundException(OrderItemNotFoundException ex) {
+    public ResponseEntity<Map<String, Object>> handleOrderItemNotFoundException(
+        OrderItemNotFoundException ex) {
         log.warn("OrderItemNotFoundException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
@@ -127,7 +137,8 @@ public class GlobalExceptionHandler {
      * PortOne Exception
      */
     @ExceptionHandler(PortOneNotFoundPaymentException.class)
-    public ResponseEntity<Map<String, Object>> handlePortOneNotFoundPaymentException(PortOneNotFoundPaymentException ex) {
+    public ResponseEntity<Map<String, Object>> handlePortOneNotFoundPaymentException(
+        PortOneNotFoundPaymentException ex) {
         log.warn("PortOneNotFoundPaymentException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
@@ -137,14 +148,16 @@ public class GlobalExceptionHandler {
      * Review Exception
      */
     @ExceptionHandler(ReviewNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleReviewNotFoundException(ReviewNotFoundException ex) {
+    public ResponseEntity<Map<String, Object>> handleReviewNotFoundException(
+        ReviewNotFoundException ex) {
         log.warn("ReviewNotFoundException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
     }
 
     @ExceptionHandler(ReviewAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> handleReviewAlreadyExistsException(ReviewAlreadyExistsException ex) {
+    public ResponseEntity<Map<String, Object>> handleReviewAlreadyExistsException(
+        ReviewAlreadyExistsException ex) {
         log.warn("ReviewAlreadyExistsException 발생: {}", ex.getMessage(), ex);
 
         return errorResponse(ex.getStatus(), ex.getMessage());
