@@ -1,5 +1,7 @@
 package com.example.ecommerce.controller;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import com.example.ecommerce.common.enums.product.Category;
 import com.example.ecommerce.common.enums.product.Size;
 import com.example.ecommerce.dto.PageableDto;
@@ -11,9 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.*;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ProductControllerTest {
@@ -30,13 +34,13 @@ class ProductControllerTest {
     void createProduct_success() throws Exception {
         //given
         CreateProductDto createProductDto = CreateProductDto.builder()
-                .name("치노 팬츠")
-                .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
-                .unitPrice(50000)
-                .stockQuantity(100)
-                .category(Category.PANTS)
-                .size(Size.M)
-                .build();
+            .name("치노 팬츠")
+            .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
+            .unitPrice(50000)
+            .stockQuantity(100)
+            .category(String.valueOf(Category.PANTS))
+            .size(String.valueOf(Size.M))
+            .build();
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
@@ -47,10 +51,10 @@ class ProductControllerTest {
 
         //when
         ResponseEntity<Long> response = restTemplate.exchange(
-                URL, // 요청 URL
-                HttpMethod.POST, // HTTP 메서드
-                request, // 요청 본문
-                Long.class // 응답 타입
+            URL, // 요청 URL
+            HttpMethod.POST, // HTTP 메서드
+            request, // 요청 본문
+            Long.class // 응답 타입
         );
 
         //then
@@ -69,21 +73,24 @@ class ProductControllerTest {
         int page = 1;
         int size = 10;
 
-        String queryString = "/search?keyword=" + keyword + "&category=" + category + "&productSize=" + productSize + "&page=" + page + "&size=" + size;
+        String queryString =
+            "/search?keyword=" + keyword + "&category=" + category + "&productSize=" + productSize
+                + "&page=" + page + "&size=" + size;
 
         //when
         ResponseEntity<String> response = restTemplate.exchange(
-                URL + queryString,
-                HttpMethod.GET,
-                null, // GET 요청에는 body가 없으므로 null
-                String.class
+            URL + queryString,
+            HttpMethod.GET,
+            null, // GET 요청에는 body가 없으므로 null
+            String.class
         );
 
         //then
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
         assertThat(response.getBody()).isNotNull();
 
-        PageableDto<ProductDto> pageableDto = objectMapper.readValue(response.getBody(), PageableDto.class);
+        PageableDto<ProductDto> pageableDto = objectMapper.readValue(response.getBody(),
+            PageableDto.class);
         assertThat(pageableDto).isNotNull();
         assertThat(pageableDto.page()).isEqualTo(1);
         assertThat(pageableDto.size()).isEqualTo(10);
@@ -99,17 +106,18 @@ class ProductControllerTest {
 
         //when
         ResponseEntity<String> response = restTemplate.exchange(
-                URL + queryString,
-                HttpMethod.GET,
-                null,
-                String.class
+            URL + queryString,
+            HttpMethod.GET,
+            null,
+            String.class
         );
 
         //then
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
         assertThat(response.getBody()).isNotNull();
 
-        PageableDto<ProductDto> pageableDto = objectMapper.readValue(response.getBody(), PageableDto.class);
+        PageableDto<ProductDto> pageableDto = objectMapper.readValue(response.getBody(),
+            PageableDto.class);
         assertThat(pageableDto).isNotNull();
         assertThat(pageableDto.page()).isEqualTo(1);
         assertThat(pageableDto.size()).isEqualTo(10);
@@ -122,11 +130,11 @@ class ProductControllerTest {
 
         //when
         ResponseEntity<ProductDto> response = restTemplate.exchange(
-                URL + "/{id}",
-                HttpMethod.GET,
-                null,
-                ProductDto.class,
-                productId
+            URL + "/{id}",
+            HttpMethod.GET,
+            null,
+            ProductDto.class,
+            productId
         );
 
         //then
@@ -140,13 +148,13 @@ class ProductControllerTest {
         Long productId = 1L;
 
         ProductDto productDto = ProductDto.builder()
-                .name("패딩 점퍼")
-                .description("방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.")
-                .unitPrice(50000)
-                .stockQuantity(100)
-                .category(Category.OUTER)
-                .size(Size.L)
-                .build();
+            .name("패딩 점퍼")
+            .description("방한용으로 착용하기 좋은 따뜻한 패딩 점퍼입니다.")
+            .unitPrice(50000)
+            .stockQuantity(100)
+            .category(String.valueOf(Category.OUTER))
+            .size(String.valueOf(Size.L))
+            .build();
 
         //when
         HttpHeaders headers = new HttpHeaders();
@@ -154,11 +162,11 @@ class ProductControllerTest {
         HttpEntity<ProductDto> requestEntity = new HttpEntity<>(productDto, headers);
 
         ResponseEntity<ProductDto> response = restTemplate.exchange(
-                URL + "/{id}",
-                HttpMethod.PATCH,
-                requestEntity,
-                ProductDto.class,
-                productId
+            URL + "/{id}",
+            HttpMethod.PATCH,
+            requestEntity,
+            ProductDto.class,
+            productId
         );
 
         //then
@@ -174,11 +182,11 @@ class ProductControllerTest {
 
         //when
         ResponseEntity<String> response = restTemplate.exchange(
-                URL + "/{id}",
-                HttpMethod.DELETE,
-                null,
-                String.class,
-                productId
+            URL + "/{id}",
+            HttpMethod.DELETE,
+            null,
+            String.class,
+            productId
         );
 
         //then
