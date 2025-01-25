@@ -40,7 +40,7 @@ public class ProductServiceImpl implements ProductService {
 
         log.info("AWS S3 - generated fileKey : " + fileKey);
 
-        Product product = CreateProductDto.toEntity(createProductDto, file, fileKey);
+        Product product = createProductDto.toEntity(createProductDto, file, fileKey);
 
         log.info("dto로부터 변환된 Product 엔티티 :" + product);
 

@@ -35,7 +35,7 @@ public record CreateProductDto(
     Boolean shopDisplayable
 ) {
 
-    public static Product toEntity(CreateProductDto dto, MultipartFile file, String fileKey) {
+    public Product toEntity(CreateProductDto dto, MultipartFile file, String fileKey) {
         return Product.builder()
             .name(dto.name)
             .description(dto.description)
