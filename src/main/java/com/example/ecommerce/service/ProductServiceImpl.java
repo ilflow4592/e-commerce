@@ -11,7 +11,6 @@ import com.example.ecommerce.entity.Product;
 import com.example.ecommerce.repository.ProductRepository;
 import com.example.ecommerce.repository.custom.ProductRepositoryCustom;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,7 +34,6 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @Override
     public Long createProduct(CreateProductDto createProductDto, MultipartFile file) {
-        // 파일을 S3에 업로드
         String fileKey = s3Service.uploadFile(file);
 
         log.info("AWS S3 - generated fileKey : " + fileKey);
@@ -106,19 +104,24 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDto updateProduct(Long id, ProductDto productDto, MultipartFile file) {
         String fileKey = null;
+        String presignedUrl = null;
 
         if (file != null) {
             // 파일을 S3에 업로드
             fileKey = s3Service.uploadFile(file);
 
             log.info("AWS S3 - generated fileKey : " + fileKey);
+
+            presignedUrl = s3Service.getPresignedUrl(fileKey);
+
+            log.info("AWS S3 - generated presignedUrl : " + fileKey);
         }
 
         Product product = findProductById(id);
 
         product.update(productDto, file != null ? file.getOriginalFilename() : null, fileKey);
 
-        return Product.toDto(product);
+        return Product.toDto(product, product.getFileName(), presignedUrl);
     }
 
     @Transactional
@@ -135,7 +138,7 @@ public class ProductServiceImpl implements ProductService {
                 ProductException.NOTFOUND.getMessage()));
     }
 
-    private List<ProductDto> convertToProductDtoList(List<Product> productDtoPageableDto) {
+    protected List<ProductDto> convertToProductDtoList(List<Product> productDtoPageableDto) {
         return productDtoPageableDto.stream()
             .map(product -> {
                 String fileKey = product.getFileKey();
@@ -147,12 +150,13 @@ public class ProductServiceImpl implements ProductService {
                     .description(product.getDescription())
                     .unitPrice(product.getUnitPrice())
                     .stockQuantity(product.getStockQuantity())
+                    .shopDisplayable(product.getShopDisplayable())
                     .category(String.valueOf(product.getCategory()))
                     .size(String.valueOf(product.getSize()))
                     .fileName(product.getFileName())
                     .fileUrl(fileUrl)
                     .build();
             })
-            .collect(Collectors.toList());
+            .toList();
     }
 }
