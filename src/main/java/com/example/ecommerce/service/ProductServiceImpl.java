@@ -2,8 +2,12 @@ package com.example.ecommerce.service;
 
 import com.example.ecommerce.common.enums.product.Category;
 import com.example.ecommerce.common.enums.product.Size;
+import com.example.ecommerce.common.exception.file.FileContentTypeMismatchException;
+import com.example.ecommerce.common.exception.file.FileException;
+import com.example.ecommerce.common.exception.file.FileIsEmptyException;
 import com.example.ecommerce.common.exception.product.ProductException;
 import com.example.ecommerce.common.exception.product.ProductNotFoundException;
+import com.example.ecommerce.common.exception.product.ProductServiceBusinessException;
 import com.example.ecommerce.dto.PageableDto;
 import com.example.ecommerce.dto.product.CreateProductDto;
 import com.example.ecommerce.dto.product.ProductDto;
@@ -33,16 +37,37 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     @Override
-    public Long createProduct(CreateProductDto createProductDto, MultipartFile file) {
-        String fileKey = s3Service.uploadFile(file);
+    public ProductDto createProduct(CreateProductDto createProductDto, MultipartFile file) {
+        ProductDto productDto;
 
-        log.info("AWS S3 - generated fileKey : " + fileKey);
+        try {
+            log.info("ProductService::createProduct execution started.");
 
-        Product product = createProductDto.toEntity(createProductDto, file, fileKey);
+            checkFileValidation(file);
 
-        log.info("dto로부터 변환된 Product 엔티티 :" + product);
+            String fileKey = s3Service.uploadFile(file);
+            log.debug("S3Service::uploadFile generated fileKey : {}", fileKey);
 
-        return productRepository.save(product).getId();
+            Product product = createProductDto.toEntity(createProductDto, file, fileKey);
+            log.debug("ProductService::createProduct toEntity converter parameters : ({} {} {})",
+                createProductDto, file, fileKey);
+
+            Product result = productRepository.save(product);
+            log.debug("ProductService::createProduct received response from Database : {}",
+                result);
+
+            productDto = Product.toDto(result);
+            log.debug("ProductService::createProduct toDto converter parameter : ({})", productDto);
+        } catch (Exception ex) {
+            log.error(
+                "Exception occurred while persisting product to Database, Exception message : {}",
+                ex.getMessage());
+            throw new ProductServiceBusinessException(
+                "Exception occurred while create a new product");
+        }
+
+        log.info("ProductService::createProduct execution successfully ended.");
+        return productDto;
     }
 
     @Override
@@ -158,5 +183,25 @@ public class ProductServiceImpl implements ProductService {
                     .build();
             })
             .toList();
+    }
+
+    private void checkFileValidation(MultipartFile file) {
+        log.info("File validation started.");
+
+        //파일이 존재하는지 체크
+        if (file.isEmpty()) {
+            throw new FileIsEmptyException(FileException.EMPTY.getStatus(),
+                FileException.EMPTY.getMessage());
+        }
+
+        // MIME 타입이 image/png 인지 확인
+        String contentType = file.getContentType();
+
+        if (!"image/png".equalsIgnoreCase(contentType)) {
+            throw new FileContentTypeMismatchException(FileException.MISMATCH.getStatus(),
+                FileException.MISMATCH.getMessage());
+        }
+
+        log.info("File validation successfully ended.");
     }
 }
