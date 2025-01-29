@@ -1,6 +1,8 @@
 package com.example.ecommerce.common.exception;
 
 
+import com.example.ecommerce.common.exception.file.FileContentTypeMismatchException;
+import com.example.ecommerce.common.exception.file.FileIsEmptyException;
 import com.example.ecommerce.common.exception.order.OrderNotFoundException;
 import com.example.ecommerce.common.exception.order.OrderTotalPriceNotCorrectException;
 import com.example.ecommerce.common.exception.order_item.OrderItemNotFoundException;
@@ -55,6 +57,25 @@ public class GlobalExceptionHandler {
             .toList();
 
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * File Exception
+     */
+    @ExceptionHandler(FileIsEmptyException.class)
+    public ResponseEntity<Map<String, Object>> handleFileIsEmptyException(
+        FileIsEmptyException ex) {
+        log.warn("FileIsEmptyException 발생: {}", ex.getMessage(), ex);
+
+        return errorResponse(ex.getStatus(), ex.getMessage());
+    }
+
+    @ExceptionHandler(FileContentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleFileContentTypeMismatchException(
+        FileContentTypeMismatchException ex) {
+        log.warn("FileContentTypeMismatchException 발생: {}", ex.getMessage(), ex);
+
+        return errorResponse(ex.getStatus(), ex.getMessage());
     }
 
     /**

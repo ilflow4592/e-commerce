@@ -20,12 +20,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @Entity(name = "products")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
 public class Product extends BaseEntity {
 
     @Id
@@ -92,33 +94,15 @@ public class Product extends BaseEntity {
     }
 
     public void update(ProductDto dto, String fileName, String fileKey) {
-        if (dto.name() != null) {
-            this.name = dto.name();
-        }
-        if (dto.description() != null) {
-            this.description = dto.description();
-        }
-        if (dto.unitPrice() != null) {
-            this.unitPrice = dto.unitPrice();
-        }
-        if (dto.stockQuantity() != null) {
-            this.stockQuantity = dto.stockQuantity();
-        }
-        if (dto.category() != null) {
-            this.category = Category.valueOf(dto.category());
-        }
-        if (dto.size() != null) {
-            this.size = Size.valueOf(dto.size());
-        }
-        if (dto.shopDisplayable() != null) {
-            this.shopDisplayable = dto.shopDisplayable();
-        }
-        if (fileName != null) {
-            this.fileName = fileName;
-        }
-        if (fileKey != null) {
-            this.fileKey = fileKey;
-        }
+        this.name = dto.name();
+        this.description = dto.description();
+        this.unitPrice = dto.unitPrice();
+        this.stockQuantity = dto.stockQuantity();
+        this.category = Category.valueOf(dto.category());
+        this.size = Size.valueOf(dto.size());
+        this.shopDisplayable = dto.shopDisplayable();
+        this.fileName = fileName;
+        this.fileKey = fileKey;
     }
 
     public void updateStockQuantity(Integer stockQuantity) {
