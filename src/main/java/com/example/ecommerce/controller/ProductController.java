@@ -33,19 +33,18 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<?> createProduct(
+    public ResponseEntity<ProductDto> createProduct(
         @Valid @RequestPart("createProductDto") CreateProductDto createProductDto,
         @RequestPart("file") MultipartFile file
     ) {
-        log.info("ProductController - createProduct(POST) : " + createProductDto);
+        log.info("ProductController::createNewProduct createProductDto : {}, file : {}",
+            createProductDto, file);
 
-        ResponseEntity<String> body = checkFileValidation(file);
-        if (body != null) {
-            return body;
-        }
+        ProductDto productDto = productService.createProduct(createProductDto, file);
 
-        Long productId = productService.createProduct(createProductDto, file);
-        return new ResponseEntity<>(productId, HttpStatus.CREATED);
+        log.info("ProductController::createNewProduct response : {}", productDto);
+
+        return new ResponseEntity<>(productDto, HttpStatus.CREATED);
     }
 
     @GetMapping("/search")
@@ -97,20 +96,6 @@ public class ProductController {
     public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.ok("id = " + id + "인 상품이 성공적으로 삭제되었습니다.");
-    }
-
-    private static ResponseEntity<String> checkFileValidation(MultipartFile file) {
-        //파일이 존재하는지 체크
-        if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body("파일이 비어있습니다.");
-        }
-
-        // MIME 타입이 image/png 인지 확인
-        String contentType = file.getContentType();
-        if (!"image/png".equalsIgnoreCase(contentType)) {
-            return ResponseEntity.badRequest().body("PNG 파일만 업로드할 수 있습니다.");
-        }
-        return null;
     }
 
 }
