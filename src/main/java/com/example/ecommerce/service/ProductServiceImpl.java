@@ -46,21 +46,23 @@ public class ProductServiceImpl implements ProductService {
             checkFileValidation(file);
 
             String fileKey = s3Service.uploadFile(file);
-            log.debug("S3Service::uploadFile generated fileKey : {}", fileKey);
+            log.debug("Called - s3Service.uploadFile(file), response - fileKey : {}", fileKey);
 
             Product product = createProductDto.toEntity(createProductDto, file, fileKey);
-            log.debug("ProductService::createProduct toEntity converter parameters : ({} {} {})",
+            log.debug(
+                "Called - createProductDto.toEntity(createProductDto, file, fileKey), converter parameters : ({} {} {})",
                 createProductDto, file, fileKey);
 
             Product result = productRepository.save(product);
-            log.debug("ProductService::createProduct received response from Database : {}",
+            log.debug(
+                "Called - productRepository.save(product), response from database - result : {}",
                 result);
 
             productDto = Product.toDto(result);
-            log.debug("ProductService::createProduct toDto converter parameter : ({})", productDto);
+            log.debug("Called - Product.toDto(result),  converter parameter : ({})", productDto);
         } catch (Exception ex) {
             log.error(
-                "Exception occurred while persisting product to Database, Exception message : {}",
+                "Exception occurred! Exception message : {}",
                 ex.getMessage());
             throw new ProductServiceBusinessException(
                 "Exception occurred while create a new product");
@@ -113,16 +115,34 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDto getProduct(Long id) {
-        Product product = findProductById(id);
+        try {
+            log.info("ProductService::getProduct execution started.");
 
-        String fileKey = product.getFileKey();
+            Product product = findProductById(id);
+            log.debug(
+                "Called - productRepository.findById(id), response from database - product : {}",
+                product);
 
-        // S3에서 파일 URL을 생성
-        String fileUrl = s3Service.getPresignedUrl(fileKey);
+            String fileKey = product.getFileKey();
+            log.debug("Called - product.getFileKey(), response - fileKey : {}", fileKey);
 
-        String fileName = product.getFileName();
+            String fileUrl = s3Service.getPresignedUrl(fileKey);
+            log.debug("Called - s3Service.getPresignedUrl(fileKey), response - fileUrl : {}",
+                fileUrl);
 
-        return Product.toDto(product, fileName, fileUrl);
+            String fileName = product.getFileName();
+            log.debug("Called - product.getFileName(), response - fileName : {}", fileName);
+
+            log.info("ProductService::getProduct execution successfully ended.");
+
+            return Product.toDto(product, fileName, fileUrl);
+
+        } catch (Exception ex) {
+            log.error(
+                "Exception occurred! Exception message : {}", ex.getMessage());
+            throw new ProductServiceBusinessException(
+                "Exception occurred while retrieving the product from the database.");
+        }
     }
 
     @Transactional

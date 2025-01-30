@@ -62,14 +62,27 @@ public class S3Service {
     }
 
     public String getPresignedUrl(String fileKey) {
-        S3Presigner presigner = S3Presigner.builder()
-            .region(Region.of(region))
-            .credentialsProvider(
-                StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
-            .build();
+        log.info("S3Service::getPresignedUrl execution started.");
 
-        return presigner.presignGetObject(b -> b.signatureDuration(Duration.ofMinutes(60))
-            .getObjectRequest(r -> r.bucket(bucketName).key(fileKey))).url().toString();
+        try {
+            S3Presigner presigner = S3Presigner.builder()
+                .region(Region.of(region))
+                .credentialsProvider(
+                    StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .build();
+
+            String presignedUrl = presigner.presignGetObject(
+                b -> b.signatureDuration(Duration.ofMinutes(60))
+                    .getObjectRequest(r -> r.bucket(bucketName).key(fileKey))).url().toString();
+
+            log.info("S3Service::getPresignedUrl execution successfully ended.");
+
+            return presignedUrl;
+        } catch (Exception ex) {
+            throw new IllegalStateException("파일 변환 살패", ex);
+        }
+
     }
 
 }

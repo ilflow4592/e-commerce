@@ -37,12 +37,12 @@ public class ProductController {
         @Valid @RequestPart("createProductDto") CreateProductDto createProductDto,
         @RequestPart("file") MultipartFile file
     ) {
-        log.info("ProductController::createNewProduct createProductDto : {}, file : {}",
+        log.info("ProductController::createNewProduct, request -  createProductDto : {}, file : {}",
             createProductDto, file);
 
         ProductDto productDto = productService.createProduct(createProductDto, file);
 
-        log.info("ProductController::createNewProduct response : {}", productDto);
+        log.info("ProductController::createNewProduct, response - productDto: {}", productDto);
 
         return new ResponseEntity<>(productDto, HttpStatus.CREATED);
     }
@@ -75,8 +75,13 @@ public class ProductController {
 
     @GetMapping("{id}")
     public ResponseEntity<ProductDto> getProduct(@PathVariable Long id) {
-        ProductDto dto = productService.getProduct(id);
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+        log.info("ProductController::createNewProduct, request - id : {}", id);
+
+        ProductDto productDto = productService.getProduct(id);
+
+        log.info("ProductController:createNewProduct, response - productDto: {}", productDto);
+
+        return new ResponseEntity<>(productDto, HttpStatus.OK);
     }
 
     @PutMapping("{id}")
