@@ -1,5 +1,6 @@
 package com.example.ecommerce.controller;
 
+import com.example.ecommerce.common.aop.ControllerLog;
 import com.example.ecommerce.common.enums.product.Category;
 import com.example.ecommerce.common.enums.product.Size;
 import com.example.ecommerce.dto.PageableDto;
@@ -8,7 +9,6 @@ import com.example.ecommerce.dto.product.ProductDto;
 import com.example.ecommerce.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v1/products")
 @AllArgsConstructor
-@Slf4j
+@ControllerLog
 public class ProductController {
 
     private final ProductService productService;
@@ -37,13 +37,7 @@ public class ProductController {
         @Valid @RequestPart("createProductDto") CreateProductDto createProductDto,
         @RequestPart("file") MultipartFile file
     ) {
-        log.info("ProductController::createNewProduct, request -  createProductDto : {}, file : {}",
-            createProductDto, file);
-
         ProductDto productDto = productService.createProduct(createProductDto, file);
-
-        log.info("ProductController::createNewProduct, response - productDto: {}", productDto);
-
         return new ResponseEntity<>(productDto, HttpStatus.CREATED);
     }
 
@@ -75,12 +69,7 @@ public class ProductController {
 
     @GetMapping("{id}")
     public ResponseEntity<ProductDto> getProduct(@PathVariable Long id) {
-        log.info("ProductController::createNewProduct, request - id : {}", id);
-
         ProductDto productDto = productService.getProduct(id);
-
-        log.info("ProductController:createNewProduct, response - productDto: {}", productDto);
-
         return new ResponseEntity<>(productDto, HttpStatus.OK);
     }
 
@@ -90,9 +79,6 @@ public class ProductController {
         @Valid @RequestPart(value = "productDto") ProductDto productDto,
         @RequestPart(value = "file", required = false) MultipartFile file
     ) {
-        log.info("ProductController - updateProduct(PATCH) : " + productDto);
-        log.info("file" + file);
-
         ProductDto dto = productService.updateProduct(id, productDto, file);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
