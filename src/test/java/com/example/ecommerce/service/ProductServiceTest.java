@@ -1,11 +1,11 @@
 package com.example.ecommerce.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,8 +22,6 @@ import com.example.ecommerce.repository.ProductRepository;
 import com.example.ecommerce.repository.custom.ProductRepositoryCustom;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +32,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,15 +46,15 @@ class ProductServiceTest {
     private S3Service s3Service;
     @InjectMocks
     private ProductServiceImpl productService;
-    private Product product;
-    private Product product1;
-    private Product product2;
-    private List<ProductDto> productDtoList;
-    private List<Product> productList;
+    private final String S3_URL = "https://s3.com/";
 
-    @BeforeEach
-    void setUp() {
-        product = Product.builder()
+    // request : CreateProductDto createProductDto, MultipartFile file
+    // response : Long id
+    @Test
+    @DisplayName("상품 생성")
+    void createProduct() {
+        // given
+        Product product = Product.builder()
             .id(1L)
             .name("치노 팬츠")
             .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
@@ -71,71 +68,6 @@ class ProductServiceTest {
             .avgRating(0.0f)
             .build();
 
-        productList = List.of(Product.builder()
-                .id(2L)
-                .name("패딩 점퍼")
-                .description("따뜻한 겨울 점퍼")
-                .unitPrice(120000)
-                .stockQuantity(30)
-                .category(Category.OUTER)
-                .size(Size.L)
-                .shopDisplayable(true)
-                .fileName("padding.png")
-                .fileKey("file-key-1")
-                .build(),
-            Product.builder()
-                .id(3L)
-                .name("트렌치 코트")
-                .description("세련된 스타일의 코트")
-                .unitPrice(150000)
-                .stockQuantity(20)
-                .category(Category.OUTER)
-                .size(Size.M)
-                .shopDisplayable(false)
-                .fileName("coat.png")
-                .fileKey("file-key-2")
-                .build()
-        );
-
-        product1 = productList.get(0);
-        product2 = productList.get(1);
-
-        // ProductDto 변환 리스트 생성
-        productDtoList = List.of(
-            ProductDto.builder()
-                .id(product1.getId())
-                .name(product1.getName())
-                .description(product1.getDescription())
-                .unitPrice(product1.getUnitPrice())
-                .stockQuantity(product1.getStockQuantity())
-                .category(product1.getCategory().name())
-                .size(product1.getSize().name())
-                .shopDisplayable(product1.getShopDisplayable())
-                .fileName(product1.getFileName())
-                .fileUrl("https://s3.com/" + product1.getFileKey())
-                .build(),
-
-            ProductDto.builder()
-                .id(product2.getId())
-                .name(product2.getName())
-                .description(product2.getDescription())
-                .unitPrice(product2.getUnitPrice())
-                .stockQuantity(product2.getStockQuantity())
-                .category(product2.getCategory().name())
-                .size(product2.getSize().name())
-                .shopDisplayable(product2.getShopDisplayable())
-                .fileName(product2.getFileName())
-                .fileUrl("https://s3.com/" + product2.getFileKey())
-                .build()
-        );
-    }
-
-    // request : CreateProductDto createProductDto, MultipartFile file
-    // response : Long id
-    @Test
-    @DisplayName("상품 생성")
-    void createProduct() {
-        // given
         CreateProductDto createProductDto = CreateProductDto.builder()
             .name("치노 팬츠")
             .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
@@ -150,7 +82,7 @@ class ProductServiceTest {
             "file",
             "product_image.png",
             "image/png",
-            new byte[0]
+            new byte[1] // 0으로 설정할 경우 empty file로 인식됨
         );
 
         when(s3Service.uploadFile(any(MultipartFile.class))).thenReturn(
@@ -158,20 +90,34 @@ class ProductServiceTest {
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
         // when
-        Long productId = productService.createProduct(createProductDto, file);
+        ProductDto productDto = productService.createProduct(createProductDto, file);
 
         // then
         verify(s3Service, times(1)).uploadFile(file);
         verify(productRepository, times(1)).save(any(Product.class));
 
-        assertNotNull(productId);
-        assertEquals(product.getId(), productId);
+        assertNotNull(productDto);
+        assertEquals(product.getId(), productDto.id());
     }
 
     @Test
     @DisplayName("상품 생성 - createProducDto.toEntity() 변환 확인")
     void createProduct_createProductDto_toEntity_check() {
         // given
+        Product product = Product.builder()
+            .id(1L)
+            .name("치노 팬츠")
+            .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
+            .unitPrice(50000)
+            .stockQuantity(100)
+            .category(Category.PANTS)
+            .size(Size.M)
+            .shopDisplayable(true)
+            .fileName("product_image.png")
+            .fileKey("uuid-product_image.png")
+            .avgRating(0.0f)
+            .build();
+
         CreateProductDto createProductDto = spy(CreateProductDto.builder()
             .name("치노 팬츠")
             .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
@@ -186,7 +132,7 @@ class ProductServiceTest {
             "file",
             "product_image.png",
             "image/png",
-            new byte[0]
+            new byte[1]
         );
 
         String fileKey = "uuid-product_image.png";
@@ -202,28 +148,119 @@ class ProductServiceTest {
             .isEqualTo(product);
     }
 
+    @Test
+    @DisplayName("상품 생성 - 데이터베이스 저장")
+    void createProduct_DB_save_check() {
+        // given
+        Product product = Product.builder()
+            .id(1L)
+            .name("치노 팬츠")
+            .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
+            .unitPrice(50000)
+            .stockQuantity(100)
+            .category(Category.PANTS)
+            .size(Size.M)
+            .shopDisplayable(true)
+            .fileName("product_image.png")
+            .fileKey("uuid-product_image.png")
+            .avgRating(0.0f)
+            .build();
+
+        // when
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+
+        Product result = productRepository.save(product);
+
+        // then
+        verify(productRepository, times(1)).save(product);
+
+        assertThat(result)
+            .usingRecursiveComparison()
+            .isEqualTo(product);
+    }
+
+    @Test
+    @DisplayName("상품 생성 - Product.toDto 변환 확인")
+    void createProduct_Product_toDto_check() {
+        // given
+        Product product = Product.builder()
+            .id(1L)
+            .name("치노 팬츠")
+            .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
+            .unitPrice(50000)
+            .stockQuantity(100)
+            .category(Category.PANTS)
+            .size(Size.M)
+            .shopDisplayable(true)
+            .fileName("product_image.png")
+            .fileKey("uuid-product_image.png")
+            .avgRating(0.0f)
+            .build();
+
+        ProductDto convertedProductDto = ProductDto.builder()
+            .id(1L)
+            .name("치노 팬츠")
+            .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
+            .unitPrice(50000)
+            .stockQuantity(100)
+            .category(String.valueOf(Category.PANTS))
+            .size(String.valueOf(Size.M))
+            .shopDisplayable(true)
+            .fileName(null)
+            .fileUrl(null)
+            .build();
+
+        ProductDto productDto;
+
+        // when
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+
+        Product result = productRepository.save(product);
+
+        productDto = Product.toDto(result);
+
+        // then
+        verify(productRepository, times(1)).save(product);
+
+        assertThat(productDto)
+            .usingRecursiveComparison()
+            .isEqualTo(convertedProductDto);
+    }
+
     // request : Pageable pageable
     // response : PageableDto<ProductDto> returnedPageableDto
     @Test
     @DisplayName("상품 전체 조회")
     void getAllProducts() {
         // given
-        List<Product> productList = IntStream.range(0, 2)
-            .mapToObj(i -> Product.builder()
-                .id((long) i)
-                .name("치노 팬츠 " + i)
-                .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
-                .unitPrice(50000)
-                .stockQuantity(100)
-                .category(Category.PANTS)
-                .size(Size.M)
+        List<Product> productList = List.of(Product.builder()
+                .id(1L)
+                .name("패딩 점퍼")
+                .description("따뜻한 겨울 점퍼")
+                .unitPrice(120000)
+                .stockQuantity(30)
+                .category(Category.OUTER)
+                .size(Size.L)
                 .shopDisplayable(true)
-                .fileName("file_name" + "_" + i + ".png")
-                .fileKey("uuid-file_name" + "_" + i + ".png")
-                .build())
-            .toList();
+                .fileName("padding.png")
+                .fileKey("file-key-1")
+                .build(),
+            Product.builder()
+                .id(2L)
+                .name("트렌치 코트")
+                .description("세련된 스타일의 코트")
+                .unitPrice(150000)
+                .stockQuantity(20)
+                .category(Category.OUTER)
+                .size(Size.M)
+                .shopDisplayable(false)
+                .fileName("coat.png")
+                .fileKey("file-key-2")
+                .build()
+        );
 
-        Pageable pageable = PageRequest.of(1, 10, Sort.by("name").ascending());
+        // 페이지네이션 설정
+        Pageable pageable = PageRequest.of(1, 10);
         Page<Product> mockPage = new PageImpl<>(productList, pageable, productList.size());
 
         when(productRepository.findAll(pageable)).thenReturn(mockPage);
@@ -232,14 +269,14 @@ class ProductServiceTest {
         PageableDto<ProductDto> result = productService.getAllProducts(pageable);
 
         // then
-        verify(productRepository, times(1)).findAll(pageable); // findAll이 한 번 호출되었는지 확인
+        verify(productRepository, times(1)).findAll(pageable);
 
         assertNotNull(result);
-        assertEquals(result.page() - 1, 1);
-        assertEquals(result.size(), 10);
-        assertEquals(result.data().size(), 2);
-        assertThat(result.data().get(0).name()).isEqualTo("치노 팬츠 0");
-        assertThat(result.data().get(1).name()).isEqualTo("치노 팬츠 1");
+        assertEquals(1, result.page() - 1);
+        assertEquals(10, result.size());
+        assertEquals(2, result.data().size());
+        assertThat(result.data().get(0).name()).isEqualTo("패딩 점퍼");
+        assertThat(result.data().get(1).name()).isEqualTo("트렌치 코트");
     }
 
     // request : String keyword, Category category, Size productSize, Pageable pageable, String entryPoint
@@ -248,41 +285,106 @@ class ProductServiceTest {
     @DisplayName("상품 검색 - entryPoint 미포함(shopDisplayable : true, false 둘 다 가능)")
     void searchProductsWithoutEntryPoint() {
         // given
-        String keyword = "패딩";
+
+        List<Product> productList = List.of(Product.builder()
+                .id(1L)
+                .name("패딩 점퍼")
+                .description("따뜻한 겨울 점퍼")
+                .unitPrice(120000)
+                .stockQuantity(30)
+                .category(Category.OUTER)
+                .size(Size.L)
+                .shopDisplayable(true)
+                .fileName("padding.png")
+                .fileKey("file-key-1")
+                .build(),
+            Product.builder()
+                .id(2L)
+                .name("트렌치 코트")
+                .description("세련된 스타일의 코트")
+                .unitPrice(150000)
+                .stockQuantity(20)
+                .category(Category.OUTER)
+                .size(Size.L)
+                .shopDisplayable(false)
+                .fileName("coat.png")
+                .fileKey("file-key-2")
+                .build()
+        );
+
+        Product product1 = productList.get(0);
+        Product product2 = productList.get(1);
+
+        List<ProductDto> productDtoList = List.of(
+            ProductDto.builder()
+                .id(product1.getId())
+                .name(product1.getName())
+                .description(product1.getDescription())
+                .unitPrice(product1.getUnitPrice())
+                .stockQuantity(product1.getStockQuantity())
+                .category(product1.getCategory().name())
+                .size(product1.getSize().name())
+                .shopDisplayable(product1.getShopDisplayable())
+                .fileName(product1.getFileName())
+                .fileUrl(S3_URL + product1.getFileKey())
+                .build(),
+
+            ProductDto.builder()
+                .id(product2.getId())
+                .name(product2.getName())
+                .description(product2.getDescription())
+                .unitPrice(product2.getUnitPrice())
+                .stockQuantity(product2.getStockQuantity())
+                .category(product2.getCategory().name())
+                .size(product2.getSize().name())
+                .shopDisplayable(product2.getShopDisplayable())
+                .fileName(product2.getFileName())
+                .fileUrl(S3_URL + product2.getFileKey())
+                .build()
+        );
+
+        // 요청 파리미터
+        String keyword = null;
         Category category = Category.OUTER;
         Size size = Size.L;
+        String entryPoint = null;
 
-        Pageable pageable = PageRequest.of(1, 10, Sort.by("name").ascending());
-        PageableDto<Product> mockProductPageableDto = new PageableDto<>(productList, false, 1, 10);
+        // 페이지네이션 설정
+        Pageable pageable = PageRequest.of(1, 10);
+        PageableDto<Product> mockProductPageableDto = new PageableDto<>(productList, true, 1, 10);
 
-        when(productRepositoryCustom.searchProducts(keyword, category, size, pageable, null))
+        when(productRepositoryCustom.searchProducts(keyword, category, size, pageable, entryPoint))
             .thenReturn(mockProductPageableDto);
 
         // when
-        when(s3Service.getPresignedUrl("file-key-1")).thenReturn("https://s3.com/file-key-1");
-        when(s3Service.getPresignedUrl("file-key-2")).thenReturn("https://s3.com/file-key-2");
-        PageableDto<ProductDto> result = productService.searchProducts(keyword, category, size,
-            pageable, null);
+        when(s3Service.getPresignedUrl(productList.get(0).getFileKey())).thenReturn(
+            S3_URL + productList.get(0).getFileKey());
+        when(s3Service.getPresignedUrl(productList.get(1).getFileKey())).thenReturn(
+            S3_URL + productList.get(1).getFileKey());
 
-        System.out.println("result = " + result);
+        PageableDto<ProductDto> productDtoPageableDto = productService.searchProducts(keyword,
+            category, size,
+            pageable, entryPoint);
 
         // then
         verify(productRepositoryCustom, times(1)).searchProducts(keyword, category, size, pageable,
-            null);
-        verify(s3Service, times(1)).getPresignedUrl("file-key-1");
-        verify(s3Service, times(1)).getPresignedUrl("file-key-2");
+            entryPoint);
+        verify(s3Service, times(1)).getPresignedUrl(productList.get(0).getFileKey());
+        verify(s3Service, times(1)).getPresignedUrl(productList.get(1).getFileKey());
 
-        assertEquals(result.data().size(), 2);
-        assertThat(result.last()).isFalse();
-        assertThat(result.page()).isEqualTo(1);
-        assertThat(result.size()).isEqualTo(10);
+        assertEquals(2, productDtoPageableDto.data().size());
+        assertThat(productDtoPageableDto.last()).isTrue();
+        assertThat(productDtoPageableDto.page()).isEqualTo(1);
+        assertThat(productDtoPageableDto.size()).isEqualTo(10);
 
-        assertThat(result.data().get(0))
+        assertThat(productDtoPageableDto.data().get(0))
             .usingRecursiveComparison()
             .isEqualTo(productDtoList.get(0));
-        assertThat(result.data().get(1))
+        assertThat(productDtoPageableDto.data().get(1))
             .usingRecursiveComparison()
             .isEqualTo(productDtoList.get(1));
+
+        reset(productRepositoryCustom);
     }
 
     // request : String keyword, Category category, Size productSize, Pageable pageable, String entryPoint
@@ -291,41 +393,99 @@ class ProductServiceTest {
     @DisplayName("상품 검색 - entryPoint 포함(shop)")
     void searchProductsWithEntryPoint() {
         // given
-        // shopDisplayable = true인 상품 리스트 (entryPoint = "shop"일 때 필터링되어야 함)
-        List<Product> shopDisplayableProducts = List.of(product1);
+        List<Product> productList = List.of(Product.builder()
+                .id(1L)
+                .name("패딩 점퍼")
+                .description("따뜻한 겨울 점퍼")
+                .unitPrice(120000)
+                .stockQuantity(30)
+                .category(Category.OUTER)
+                .size(Size.L)
+                .shopDisplayable(true)
+                .fileName("padding.png")
+                .fileKey("file-key-1")
+                .build(),
+            Product.builder()
+                .id(2L)
+                .name("트렌치 코트")
+                .description("세련된 스타일의 코트")
+                .unitPrice(150000)
+                .stockQuantity(20)
+                .category(Category.OUTER)
+                .size(Size.M)
+                .shopDisplayable(false)
+                .fileName("coat.png")
+                .fileKey("file-key-2")
+                .build()
+        );
+
+        Product product1 = productList.get(0);
+        Product product2 = productList.get(1);
+
+        List<ProductDto> productDtoList = List.of(
+            ProductDto.builder()
+                .id(product1.getId())
+                .name(product1.getName())
+                .description(product1.getDescription())
+                .unitPrice(product1.getUnitPrice())
+                .stockQuantity(product1.getStockQuantity())
+                .category(product1.getCategory().name())
+                .size(product1.getSize().name())
+                .shopDisplayable(product1.getShopDisplayable())
+                .fileName(product1.getFileName())
+                .fileUrl(S3_URL + product1.getFileKey())
+                .build(),
+
+            ProductDto.builder()
+                .id(product2.getId())
+                .name(product2.getName())
+                .description(product2.getDescription())
+                .unitPrice(product2.getUnitPrice())
+                .stockQuantity(product2.getStockQuantity())
+                .category(product2.getCategory().name())
+                .size(product2.getSize().name())
+                .shopDisplayable(product2.getShopDisplayable())
+                .fileName(product2.getFileName())
+                .fileUrl(S3_URL + product2.getFileKey())
+                .build()
+        );
 
         // ProductDto 변환 리스트 (shopDisplayable = true만 포함)
+        List<Product> shopDisplayableProducts = List.of(productList.get(0));
+
         List<ProductDto> shopDisplayableProductDtos = List.of(
             productDtoList.get(0)
-
         );
+
         String keyword = "패딩";
         Category category = Category.OUTER;
         Size size = Size.L;
         String entryPoint = "shop";
 
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("name").ascending());
+        // 페이지네이션 설정
+        Pageable pageable = PageRequest.of(1, 10);
         PageableDto<Product> mockProductPageableDto = new PageableDto<>(shopDisplayableProducts,
-            false, 1, 10);
+            true, 1, 10);
 
         // Mock 설정: shopDisplayable = true인 상품만 반환해야 함
         when(productRepositoryCustom.searchProducts(keyword, category, size, pageable, entryPoint))
             .thenReturn(mockProductPageableDto);
-        when(s3Service.getPresignedUrl("file-key-1")).thenReturn("https://s3.com/file-key-1");
+        when(s3Service.getPresignedUrl(productList.get(0).getFileKey())).thenReturn(
+            productDtoList.get(0).fileUrl());
 
         // when
         PageableDto<ProductDto> result = productService.searchProducts(keyword, category, size,
             pageable, entryPoint);
 
+        System.out.println("result = " + result);
+
         // then
         verify(productRepositoryCustom, times(1)).searchProducts(keyword, category, size, pageable,
             entryPoint);
-        verify(s3Service, times(1)).getPresignedUrl("file-key-1");
-        verify(s3Service, never()).getPresignedUrl(
-            "file-key-2");
+        verify(s3Service, times(1)).getPresignedUrl(productList.get(0).getFileKey());
 
-        assertEquals(result.data().size(), 1);
-        assertThat(result.last()).isFalse();
+        assertEquals(1, result.data().size());
+        assertThat(result.last()).isTrue();
         assertThat(result.page()).isEqualTo(1);
         assertThat(result.size()).isEqualTo(10);
 
@@ -334,6 +494,7 @@ class ProductServiceTest {
             .usingRecursiveComparison()
             .isEqualTo(shopDisplayableProductDtos.get(0));
 
+        reset(productRepositoryCustom);
     }
 
     // request : List<Product> productDtoPageableDto
@@ -342,21 +503,81 @@ class ProductServiceTest {
     @DisplayName("Product 리스트를 ProductDto 리스트로 변환 - S3 Presigned URL 포함")
     void convertToProductDtoListTest() {
         //given
-        PageableDto<Product> mockProductPageableDto = new PageableDto<>(productList,
-            true, 1, 10);
+        List<Product> productList = List.of(Product.builder()
+                .id(1L)
+                .name("패딩 점퍼")
+                .description("따뜻한 겨울 점퍼")
+                .unitPrice(120000)
+                .stockQuantity(30)
+                .category(Category.OUTER)
+                .size(Size.L)
+                .shopDisplayable(true)
+                .fileName("padding.png")
+                .fileKey("file-key-1")
+                .build(),
+            Product.builder()
+                .id(2L)
+                .name("트렌치 코트")
+                .description("세련된 스타일의 코트")
+                .unitPrice(150000)
+                .stockQuantity(20)
+                .category(Category.OUTER)
+                .size(Size.M)
+                .shopDisplayable(false)
+                .fileName("coat.png")
+                .fileKey("file-key-2")
+                .build()
+        );
 
-        when(s3Service.getPresignedUrl("file-key-1")).thenReturn("https://s3.com/file-key-1");
-        when(s3Service.getPresignedUrl("file-key-2")).thenReturn("https://s3.com/file-key-2");
+        Product product1 = productList.get(0);
+        Product product2 = productList.get(1);
+
+        List<ProductDto> productDtoList = List.of(
+            ProductDto.builder()
+                .id(product1.getId())
+                .name(product1.getName())
+                .description(product1.getDescription())
+                .unitPrice(product1.getUnitPrice())
+                .stockQuantity(product1.getStockQuantity())
+                .category(product1.getCategory().name())
+                .size(product1.getSize().name())
+                .shopDisplayable(product1.getShopDisplayable())
+                .fileName(product1.getFileName())
+                .fileUrl(S3_URL + product1.getFileKey())
+                .build(),
+
+            ProductDto.builder()
+                .id(product2.getId())
+                .name(product2.getName())
+                .description(product2.getDescription())
+                .unitPrice(product2.getUnitPrice())
+                .stockQuantity(product2.getStockQuantity())
+                .category(product2.getCategory().name())
+                .size(product2.getSize().name())
+                .shopDisplayable(product2.getShopDisplayable())
+                .fileName(product2.getFileName())
+                .fileUrl(S3_URL + product2.getFileKey())
+                .build()
+        );
+
+        // 페이지네이션 설정
+        PageableDto<Product> mockProductPageableDto = new PageableDto<>(productList,
+            false, 1, 10);
+
+        when(s3Service.getPresignedUrl(productList.get(0).getFileKey())).thenReturn(
+            S3_URL + productList.get(0).getFileKey());
+        when(s3Service.getPresignedUrl(productList.get(1).getFileKey())).thenReturn(
+            S3_URL + productList.get(1).getFileKey());
 
         // when
         List<ProductDto> result = productService.convertToProductDtoList(
             mockProductPageableDto.data());
 
         // then
-        verify(s3Service, times(1)).getPresignedUrl("file-key-1");
-        verify(s3Service, times(1)).getPresignedUrl("file-key-2");
+        verify(s3Service, times(1)).getPresignedUrl(productList.get(0).getFileKey());
+        verify(s3Service, times(1)).getPresignedUrl(productList.get(1).getFileKey());
 
-        assertEquals(result.size(), 2);
+        assertEquals(2, result.size());
 
         assertThat(result.get(0)).usingRecursiveComparison()
             .isEqualTo(productDtoList.get(0));
@@ -364,13 +585,28 @@ class ProductServiceTest {
             .isEqualTo(productDtoList.get(1));
     }
 
-    // request : Long id
-    // response : ProductDto returnedProductDto
+    //
+//    // request : Long id
+//    // response : ProductDto returnedProductDto
     @Test
     @DisplayName("상품 단일 조회")
     void getProduct() {
         // given
         Long id = 1L;
+
+        Product product = Product.builder()
+            .id(1L)
+            .name("치노 팬츠")
+            .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
+            .unitPrice(50000)
+            .stockQuantity(100)
+            .category(Category.PANTS)
+            .size(Size.M)
+            .shopDisplayable(true)
+            .fileName("product_image.png")
+            .fileKey("uuid-product_image.png")
+            .avgRating(0.0f)
+            .build();
 
         ProductDto returnedProductDto = ProductDto.builder()
             .id(1L)
@@ -382,13 +618,12 @@ class ProductServiceTest {
             .size(String.valueOf(Size.M))
             .shopDisplayable(true)
             .fileName("product_image.png")
-            .fileUrl("file_url")
+            .fileUrl(S3_URL + product.getFileKey())
             .build();
 
-        String fileUrl = "file_url";
-
         when(productRepository.findById(id)).thenReturn(Optional.of(product));
-        when(s3Service.getPresignedUrl(product.getFileKey())).thenReturn(fileUrl);
+        when(s3Service.getPresignedUrl(product.getFileKey())).thenReturn(
+            returnedProductDto.fileUrl());
 
         // when
         ProductDto productDto = productService.getProduct(1L);
@@ -405,6 +640,20 @@ class ProductServiceTest {
     @DisplayName("찾는 상품이 존재하지 않을 시, ProductNotFoundException 예외를 던진다.")
     void getProduct_ProductNotFoundException() {
         // given
+        Product product = Product.builder()
+            .id(1L)
+            .name("치노 팬츠")
+            .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
+            .unitPrice(50000)
+            .stockQuantity(100)
+            .category(Category.PANTS)
+            .size(Size.M)
+            .shopDisplayable(true)
+            .fileName("product_image.png")
+            .fileKey("uuid-product_image.png")
+            .avgRating(0.0f)
+            .build();
+
         when(productRepository.findById(product.getId())).thenReturn(Optional.empty());
 
         // when, then
@@ -412,14 +661,29 @@ class ProductServiceTest {
         verify(productRepository, times(1)).findById(1L);
     }
 
-
-    // request : Long id, ProductDto productDto, MultipartFile file
-    // response : ProductDto returnedProductDto
+    //
+//
+//    // request : Long id, ProductDto productDto, MultipartFile file
+//    // response : ProductDto returnedProductDto
     @Test
     @DisplayName("상품 갱신 - 파일 포함")
     void updateProductWithFile() {
         // given
         Long id = 1L;
+
+        Product product = Product.builder()
+            .id(1L)
+            .name("치노 팬츠")
+            .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
+            .unitPrice(50000)
+            .stockQuantity(100)
+            .category(Category.PANTS)
+            .size(Size.M)
+            .shopDisplayable(true)
+            .fileName("product_image.png")
+            .fileKey("uuid-product_image.png")
+            .avgRating(0.0f)
+            .build();
 
         ProductDto productDto = ProductDto.builder()
             .id(1L)
@@ -431,7 +695,7 @@ class ProductServiceTest {
             .size(String.valueOf(Size.L))
             .shopDisplayable(true)
             .fileName("product_image.png")
-            .fileUrl("file_url")
+            .fileUrl(S3_URL + product.getFileKey())
             .build();
 
         MockMultipartFile file = new MockMultipartFile(
@@ -441,10 +705,8 @@ class ProductServiceTest {
             new byte[0]
         );
 
-        String fileKey = "file-key";
-
-        when(s3Service.uploadFile(file)).thenReturn(fileKey);
-        when(s3Service.getPresignedUrl(fileKey)).thenReturn("file_url");
+        when(s3Service.uploadFile(file)).thenReturn(product.getFileKey());
+        when(s3Service.getPresignedUrl(product.getFileKey())).thenReturn(productDto.fileUrl());
         when(productRepository.findById(id)).thenReturn(Optional.of(product));
 
         // when
@@ -463,6 +725,20 @@ class ProductServiceTest {
         // given
         Long id = 1L;
 
+        Product product = Product.builder()
+            .id(1L)
+            .name("치노 팬츠")
+            .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
+            .unitPrice(50000)
+            .stockQuantity(100)
+            .category(Category.PANTS)
+            .size(Size.M)
+            .shopDisplayable(true)
+            .fileName("product_image.png")
+            .fileKey("uuid-product_image.png")
+            .avgRating(0.0f)
+            .build();
+
         ProductDto productDto = ProductDto.builder()
             .id(1L)
             .name("패딩 점퍼")
@@ -472,7 +748,7 @@ class ProductServiceTest {
             .category(String.valueOf(Category.OUTER))
             .size(String.valueOf(Size.L))
             .shopDisplayable(true)
-            .fileName("product_image.png")
+            .fileName(null)
             .fileUrl(null)
             .build();
 
@@ -494,6 +770,20 @@ class ProductServiceTest {
     void deleteProduct() {
         // given
         Long id = 1L;
+
+        Product product = Product.builder()
+            .id(1L)
+            .name("치노 팬츠")
+            .description("스타일리시한 슬림 핏으로 다양한 코디에 활용 가능합니다.")
+            .unitPrice(50000)
+            .stockQuantity(100)
+            .category(Category.PANTS)
+            .size(Size.M)
+            .shopDisplayable(true)
+            .fileName("product_image.png")
+            .fileKey("uuid-product_image.png")
+            .avgRating(0.0f)
+            .build();
 
         when(productRepository.findById(id)).thenReturn(Optional.of(product));
 
