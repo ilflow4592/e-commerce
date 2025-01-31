@@ -60,6 +60,10 @@ public class ProductServiceImpl implements ProductService {
 
             productDto = Product.toDto(result);
             log.debug("Called - Product.toDto(result),  converter parameter : ({})", productDto);
+
+            log.info("ProductService::createProduct execution successfully ended.");
+
+            return productDto;
         } catch (Exception ex) {
             log.error(
                 "Exception occurred! Exception message : {}",
@@ -67,9 +71,6 @@ public class ProductServiceImpl implements ProductService {
             throw new ProductServiceBusinessException(
                 "Exception occurred while create a new product");
         }
-
-        log.info("ProductService::createProduct execution successfully ended.");
-        return productDto;
     }
 
     @Override
@@ -86,9 +87,24 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public PageableDto<ProductDto> getAllProducts(Pageable pageable) {
-        Page<Product> pageableProducts = productRepository.findAll(pageable);
+        try {
+            log.info("ProductService::getAllProducts execution started.");
 
-        return PageableDto.toDto(pageableProducts.map(Product::toDto));
+            Page<Product> pageableProducts = productRepository.findAll(pageable);
+            log.debug(
+                "Called - productRepository.findAll(pageable), response - pageableProducts : {}",
+                pageableProducts);
+
+            log.info("ProductService::createProduct execution successfully ended.");
+
+            return PageableDto.toDto(pageableProducts.map(Product::toDto));
+        } catch (Exception ex) {
+            log.error(
+                "Exception occurred! Exception message : {}",
+                ex.getMessage());
+            throw new ProductServiceBusinessException(
+                "Exception occurred while retrieving products from the database.");
+        }
     }
 
     @Override
