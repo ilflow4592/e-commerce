@@ -8,6 +8,7 @@
 - 데이터베이스 : MySQL(8.0.32)
 - 테스트 : JUnit5, Mockito
 - 스토리지 : AWS S3
+- 컨테이너 : 도커
 
 ## ERD
 <img width="640" alt="Screen Shot 2025-01-27 at 6 24 49 PM" src="https://github.com/user-attachments/assets/65f32b42-fc03-43ff-a758-fa7a530928af" />
