@@ -16,6 +16,10 @@ import com.example.ecommerce.repository.custom.ProductRepositoryCustom;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @Transactional(readOnly = true)
 @Slf4j
+@CacheConfig(cacheNames = "products", cacheManager = "cacheManager")
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
@@ -96,6 +101,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "'all'")
     public PageableDto<ProductDto> getAllProducts(Pageable pageable) {
         log.info("ProductService::getAllProducts execution started.");
 
@@ -109,6 +115,7 @@ public class ProductServiceImpl implements ProductService {
         return PageableDto.toDto(pageableProducts.map(Product::toDto));
     }
 
+    @Cacheable(key = "'shopDisplayable'")
     @Override
     public PageableDto<ProductDto> getShopDisplayableProducts(Pageable pageable) {
         log.info("ProductService::getShopDisplayableProducts execution started.");
@@ -158,6 +165,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "#id", unless = "#result == null")
     public ProductDto getProduct(Long id) {
         log.info("ProductService::getProduct execution started.");
 
@@ -215,6 +223,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     @Override
+    @Caching(evict = {
+        @CacheEvict(key = "'all'"),
+        @CacheEvict(key = "#id")
+    })
     public void deleteProduct(Long id) {
         log.info("ProductService::deleteProduct execution started.");
 
