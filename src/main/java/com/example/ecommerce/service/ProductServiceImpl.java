@@ -41,6 +41,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     @Override
+    // 캐싱 무효화 : 다음 조회 시 최신 데이터를 가져오도록 함
+    @Caching(evict = {
+        @CacheEvict(key = "'all'"),
+        @CacheEvict(key = "'shopDisplayable'"),
+        @CacheEvict(allEntries = true) // 검색 결과 캐시 모두 무효화
+    })
     public ProductDto createProduct(CreateProductDto createProductDto, MultipartFile file) {
         log.info("ProductService::createProduct execution started.");
 
@@ -70,6 +76,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "'search:' + #keyword + ':' + #category + ':' + #productSize + ':' + #pageable.pageNumber + ':' + #entryPoint")
     public PageableDto<ProductDto> searchProducts(String keyword, Category category,
         Size productSize, Pageable pageable, String entryPoint) {
         log.info("ProductService::searchProducts execution started.");
@@ -115,8 +122,9 @@ public class ProductServiceImpl implements ProductService {
         return PageableDto.toDto(pageableProducts.map(Product::toDto));
     }
 
-    @Cacheable(key = "'shopDisplayable'")
+
     @Override
+    @Cacheable(key = "'shopDisplayable'")
     public PageableDto<ProductDto> getShopDisplayableProducts(Pageable pageable) {
         log.info("ProductService::getShopDisplayableProducts execution started.");
 
@@ -148,24 +156,9 @@ public class ProductServiceImpl implements ProductService {
         return PageableDto.toDto(productDtoPage);
     }
 
-    private static Page<ProductDto> generateProductDtoPage(Pageable pageable,
-        List<ProductDto> productDtoList) {
-        log.info("ProductService::generateProductDtoPage execution started.");
-
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), productDtoList.size());
-        List<ProductDto> pagedList = productDtoList.subList(start, end);
-
-        Page<ProductDto> productDtoPage = new PageImpl<>(pagedList, pageable,
-            productDtoList.size());
-
-        log.info("ProductService::generateProductDtoPage execution successfully ended.");
-
-        return productDtoPage;
-    }
 
     @Override
-    @Cacheable(key = "#id", unless = "#result == null")
+    @Cacheable(key = "#id", unless = "#result == null") // 조회 시 값이 null이면 캐싱을 하지 않음
     public ProductDto getProduct(Long id) {
         log.info("ProductService::getProduct execution started.");
 
@@ -191,6 +184,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     @Override
+    @Caching(evict = {
+        @CacheEvict(key = "'all'"),
+        @CacheEvict(key = "'shopDisplayable'"),
+        @CacheEvict(key = "#id")
+    })
     public ProductDto updateProduct(Long id, ProductDto productDto, MultipartFile file) {
         log.info("ProductService::updateProduct execution started.");
 
@@ -225,6 +223,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Caching(evict = {
         @CacheEvict(key = "'all'"),
+        @CacheEvict(key = "'shopDisplayable'"),
         @CacheEvict(key = "#id")
     })
     public void deleteProduct(Long id) {
@@ -292,5 +291,21 @@ public class ProductServiceImpl implements ProductService {
         }
 
         log.info("File validation successfully ended.");
+    }
+
+    private static Page<ProductDto> generateProductDtoPage(Pageable pageable,
+        List<ProductDto> productDtoList) {
+        log.info("ProductService::generateProductDtoPage execution started.");
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), productDtoList.size());
+        List<ProductDto> pagedList = productDtoList.subList(start, end);
+
+        Page<ProductDto> productDtoPage = new PageImpl<>(pagedList, pageable,
+            productDtoList.size());
+
+        log.info("ProductService::generateProductDtoPage execution successfully ended.");
+
+        return productDtoPage;
     }
 }
