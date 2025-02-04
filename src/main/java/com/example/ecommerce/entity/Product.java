@@ -86,6 +86,7 @@ public class Product extends BaseEntity {
             .shopDisplayable(product.getShopDisplayable())
             .fileName(fileName)
             .fileUrl(fileUrl)
+            .createdAt(product.getCreatedAt())
             .build();
     }
 
