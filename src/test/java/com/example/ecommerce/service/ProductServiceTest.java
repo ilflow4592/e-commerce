@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,6 +19,7 @@ import com.example.ecommerce.dto.product.ProductDto;
 import com.example.ecommerce.entity.Product;
 import com.example.ecommerce.repository.ProductRepository;
 import com.example.ecommerce.repository.custom.ProductRepositoryCustom;
+import com.example.ecommerce.repository.custom.ProductRepositoryCustomImpl;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -41,7 +42,9 @@ class ProductServiceTest {
     @Mock
     private ProductRepository productRepository;
     @Mock
-    private ProductRepositoryCustom productRepositoryCustom;
+    private ProductRepositoryCustomImpl productRepositoryCustomImpl;  // Mockito 내부에서만 사용됨
+    @MockBean
+    private ProductRepositoryCustom productRepositoryCustom;  // Spring 컨텍스트에 주입됨
     @Mock
     private S3Service s3Service;
     @InjectMocks
@@ -285,7 +288,6 @@ class ProductServiceTest {
     @DisplayName("상품 검색 - entryPoint 미포함(shopDisplayable : true, false 둘 다 가능)")
     void searchProductsWithoutEntryPoint() {
         // given
-
         List<Product> productList = List.of(Product.builder()
                 .id(1L)
                 .name("패딩 점퍼")
@@ -353,7 +355,8 @@ class ProductServiceTest {
         Pageable pageable = PageRequest.of(1, 10);
         PageableDto<Product> mockProductPageableDto = new PageableDto<>(productList, true, 1, 10);
 
-        when(productRepositoryCustom.searchProducts(keyword, category, size, pageable, entryPoint))
+        when(productRepositoryCustomImpl.searchProducts(keyword, category, size, pageable,
+            entryPoint))
             .thenReturn(mockProductPageableDto);
 
         // when
@@ -367,7 +370,8 @@ class ProductServiceTest {
             pageable, entryPoint);
 
         // then
-        verify(productRepositoryCustom, times(1)).searchProducts(keyword, category, size, pageable,
+        verify(productRepositoryCustomImpl, times(1)).searchProducts(keyword, category, size,
+            pageable,
             entryPoint);
         verify(s3Service, times(1)).getPresignedUrl(productList.get(0).getFileKey());
         verify(s3Service, times(1)).getPresignedUrl(productList.get(1).getFileKey());
@@ -383,8 +387,6 @@ class ProductServiceTest {
         assertThat(productDtoPageableDto.data().get(1))
             .usingRecursiveComparison()
             .isEqualTo(productDtoList.get(1));
-
-        reset(productRepositoryCustom);
     }
 
     // request : String keyword, Category category, Size productSize, Pageable pageable, String entryPoint
@@ -468,7 +470,8 @@ class ProductServiceTest {
             true, 1, 10);
 
         // Mock 설정: shopDisplayable = true인 상품만 반환해야 함
-        when(productRepositoryCustom.searchProducts(keyword, category, size, pageable, entryPoint))
+        when(productRepositoryCustomImpl.searchProducts(keyword, category, size, pageable,
+            entryPoint))
             .thenReturn(mockProductPageableDto);
         when(s3Service.getPresignedUrl(productList.get(0).getFileKey())).thenReturn(
             productDtoList.get(0).fileUrl());
@@ -480,7 +483,8 @@ class ProductServiceTest {
         System.out.println("result = " + result);
 
         // then
-        verify(productRepositoryCustom, times(1)).searchProducts(keyword, category, size, pageable,
+        verify(productRepositoryCustomImpl, times(1)).searchProducts(keyword, category, size,
+            pageable,
             entryPoint);
         verify(s3Service, times(1)).getPresignedUrl(productList.get(0).getFileKey());
 
@@ -493,8 +497,6 @@ class ProductServiceTest {
         assertThat(result.data().get(0))
             .usingRecursiveComparison()
             .isEqualTo(shopDisplayableProductDtos.get(0));
-
-        reset(productRepositoryCustom);
     }
 
     // request : List<Product> productDtoPageableDto
