@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.stream.IntStream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 @Transactional(readOnly = true)
 @Slf4j
+@CacheConfig(cacheNames = "cart", cacheManager = "cacheManager")
 public class CartServiceImpl implements CartService {
 
     private final UserRepository userRepository;
@@ -34,6 +37,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "cart", key = "#dto.userId()")
     public void updateCartProductQuantity(UpdateCartProductDto dto) {
         log.info("CartService::updateCartProductQuantity execution started.");
 
@@ -63,6 +67,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "cart", key = "#dto.userId()")
     public void removeProduct(RemoveFromCartDto dto) {
         log.info("CartService::removeProduct execution started.");
 
